@@ -29,8 +29,7 @@ Qhull 2011.1: Republished on git@github.com:rtkg/Qhull-2011.2.git, tarball avail
 
 For more information and clean-up, see the Readme-files of the aforementioned packages. The shared libraries for libobj-0.1 and Qhull 2011.2 are installed by default into /usr/local/lib. This directory needs to be included in the LD_LIBRARY_PATH. In case of different installation directories, The include statements in the /icrcpp/Makefile need to be changed accordingly.
 
-libicr: cd into icrcpp and type make. For clean-up type make clean. To generate the documentation, run Doxygen in the /icrcpp/doc folder. An example is provided in/icrcpp/examples/src. To build it, cd into 
-/icrcpp/examples and type make. Run the compiled example with ./ex, clean-up works with make-clean.
+icrcpp: Published on git@github.com:rtkg/icrcpp.git, tarball available from https://nodeload.github.com/rtkg/icrcpp/tarball/master; cd into the root folder and type make. For clean-up type make clean. To generate the documentation, run Doxygen in the /icrcpp/doc folder. An example is provided in/icrcpp/examples/src. To build it, cd into /icrcpp/examples and type make. Run the compiled example with ./ex, clean-up works with make-clean.
 
 
 
