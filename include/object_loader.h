@@ -75,6 +75,7 @@ class ObjectLoader
   void loadObject(std::string const& file,std::string const& name);
   const TargetObjectPtr getObject()const;
   TargetObjectPtr getObject();
+  bool objectLoaded()const;
 };
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------

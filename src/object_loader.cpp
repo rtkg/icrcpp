@@ -41,6 +41,8 @@ const TargetObjectPtr ObjectLoader::getObject()const{return object_;}
 //--------------------------------------------------------------------
 TargetObjectPtr ObjectLoader::getObject(){return object_;}
 //--------------------------------------------------------------------
+bool ObjectLoader::objectLoaded()const{return object_loaded_;}
+//--------------------------------------------------------------------
 void ObjectLoader::loadObject(std::string const& file,std::string const& name)
 {
   if(object_loaded_)
