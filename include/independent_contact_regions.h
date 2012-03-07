@@ -9,9 +9,10 @@ namespace ICR
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------
 /*! 
- *  \brief Holds shared pointers to the prototype ICR::Grasp and previously computed
- *  ICR::SearchZones; checks the contact points on the target object's surface for inclusion in the
- *  independent regions
+ *  \brief Holds shared pointers to the prototype ICR::Grasp and
+ *  previously computed ICR::SearchZones; checks the contact points on
+ *  the target object's surface for inclusion in the independent
+ *  regions
  */
 class IndependentContactRegions
 {
@@ -33,12 +34,12 @@ class IndependentContactRegions
   void computeContactRegion(uint region_id);
   void clear();
 
-  IndependentContactRegions();
-
  public:
-
+  IndependentContactRegions();
   IndependentContactRegions(const SearchZonesPtr search_zones,const GraspPtr grasp);
+  /** \brief NOTE: Performes shallow copy of icr.  */
   IndependentContactRegions(IndependentContactRegions const& src);
+  /** \brief NOTE: Performes shallow copy of icr.  */
   IndependentContactRegions& operator=(IndependentContactRegions const& src);
   friend std::ostream& operator<<(std::ostream& stream, IndependentContactRegions const& icr);
   ~IndependentContactRegions();
@@ -49,7 +50,15 @@ class IndependentContactRegions
   uint getNumContactRegions()const;
   const SearchZonesPtr getSearchZones()const;
   const GraspPtr getGrasp()const;
-};
+  /** \brief Sets new search zones for this icr. Clears previously
+   *   calculated regions.
+   */
+ void setSearchZones(SearchZonesPtr sz_in); 
+
+  /** \brief Sets new grasp for this icr. Clears previously calculated
+   *   regions.
+   */
+ void setGrasp(GraspPtr g_in); };
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------
 }//;namespace ICR

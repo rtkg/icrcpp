@@ -20,7 +20,7 @@ ODIR = obj
 
 INCPATH  = -I ./tools/eigen-eigen-3.0.2/ #eigen headers
 INCPATH += -I /usr/local/include/libqhullcpp  #qhull headers
-INCPATH += -I /usr/local/include/obj #libobj headers
+INCPATH += -I /usr/local/include #libobj headers
 
 ####### Files for compiling the code
 
@@ -37,10 +37,10 @@ ICR_HEADERS = 	./include/utilities.h \
 		./include/wrench_space.h \
 		./include/search_zones.h \
 		./include/independent_contact_regions.h 
-               
+
 ICR_SOURCES = 	./src/utilities.cpp \
 		./src/contact_point.cpp \
-  		./src/target_object.cpp \
+		./src/target_object.cpp \
 		./src/object_loader.cpp	\
 		./src/wrench_cone.cpp \
 		./src/limit_surface.cpp	\
@@ -51,7 +51,7 @@ ICR_SOURCES = 	./src/utilities.cpp \
 		./src/wrench_space.cpp \
 		./src/search_zones.cpp \
 		./src/independent_contact_regions.cpp 
- 
+
 ICR_OBJECTS =	./obj/utilities.o \
 		./obj/contact_point.o \
 		./obj/target_object.o \
