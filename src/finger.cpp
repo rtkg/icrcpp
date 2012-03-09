@@ -9,8 +9,27 @@ namespace ICR
 {
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
-InclusionRule::InclusionRule() : rule_parameter_(DEFAULT_INCLUSION_RULE_PARAMETER), rule_type_(DEFAULT_INCLUSION_RULE_TYPE),filter_inside_points_(DEFAULT_INCLUSION_RULE_FILTER_INSIDE_POINTS) {}
-//--------------------------------------------------------------------------
+InclusionRule::InclusionRule() : 
+  rule_parameter_(DEFAULT_INCLUSION_RULE_PARAMETER),
+  rule_type_(DEFAULT_INCLUSION_RULE_TYPE),
+  filter_inside_points_(DEFAULT_INCLUSION_RULE_FILTER_INSIDE_POINTS) {}
+//------------------------------------------------------
+  InclusionRule::InclusionRule(double rp_in, RuleType rt_in, bool filter_in) : 
+    filter_inside_points_(filter_in) 
+  {
+    if (rp_in < 0) {
+      rule_parameter_ = DEFAULT_INCLUSION_RULE_PARAMETER;
+    } else {
+      rule_parameter_ = rp_in;
+    }
+
+    if (rt_in != Undefined_RT || rt_in != Sphere) {
+      rule_type_ = DEFAULT_INCLUSION_RULE_TYPE;
+    } else {
+      rule_type_ = rt_in;
+    }
+  }
+//------------------------------------------------------
 bool InclusionRule::inclusionTest(ContactPoint const* center_point, ContactPoint const* test_point)const
 {
   if (rule_type_==Sphere)
@@ -134,19 +153,81 @@ std::ostream& operator<<(std::ostream& stream,Patch const& patch)
 
   return stream;
 }
+//---------------------------------------------------------------
+//---------------------------------------------------------------
+FingerParameters::FingerParameters() :
+  name_("Default finger"),
+  force_magnitude_(DEFAULT_FORCE_MAGNITUDE), 
+  disc_(DEFAULT_DISC), 
+  mu_0_(DEFAULT_MU_0),  
+  mu_T_(DEFAULT_MU_T),
+  contact_type_(DEFAULT_CONTACT_TYPE),
+  model_type_(DEFAULT_CONTACT_MODEL_TYPE),
+  inclusion_rule_(InclusionRule(DEFAULT_INCLUSION_RULE_PARAMETER)) {}
 //--------------------------------------------------------------------------
+FingerParameters::FingerParameters(FingerParameters const& src) : 
+  name_(src.name_),
+  force_magnitude_(src.force_magnitude_), 
+  disc_(src.disc_),
+  mu_0_(src.mu_0_), 
+  mu_T_(src.mu_T_), 
+  contact_type_(src.contact_type_),
+  model_type_(src.model_type_), 
+  inclusion_rule_(src.inclusion_rule_) {}
 //--------------------------------------------------------------------------
-FingerParameters::FingerParameters() : force_magnitude_(DEFAULT_FORCE_MAGNITUDE), disc_(DEFAULT_DISC), mu_0_(DEFAULT_MU_0),  mu_T_(DEFAULT_MU_T),
-                                       contact_type_(DEFAULT_CONTACT_TYPE),model_type_(DEFAULT_CONTACT_MODEL_TYPE) {}
-//--------------------------------------------------------------------------
-FingerParameters::FingerParameters(FingerParameters const& src) : force_magnitude_(src.force_magnitude_), disc_(src.disc_),
-								  mu_0_(src.mu_0_),mu_T_(src.mu_T_),contact_type_(src.contact_type_),
-                                                                  model_type_(src.model_type_), inclusion_rule_(src.inclusion_rule_) {}
+FingerParameters::FingerParameters(string name, 
+				   double force_magnitude_in,
+				   uint disc_in,
+				   double mu_0_in, 
+				   double mu_T_in, 
+				   ContactType contact_type_in, 
+				   ModelType model_type_in, 
+				   double radius_in) {
+  name_ = name;
+  if (force_magnitude_in <= 0) {
+    force_magnitude_ = DEFAULT_FORCE_MAGNITUDE;
+  } else {
+      force_magnitude_ = force_magnitude_in;
+  }
+  
+  if (disc_in < 4) {
+    disc_ = DEFAULT_DISC;
+  } else {
+    disc_ = disc_in;
+  }
+  if(mu_0_in <= 0) {
+    mu_0_ = DEFAULT_MU_0;
+  } else {
+    mu_0_ = mu_0_in;
+  }
+  if(mu_T_in <= 0) {
+    mu_T_ = DEFAULT_MU_T;
+  } else {
+    mu_T_ = mu_T_in;
+  }
+  if(contact_type_in != Undefined_CT || contact_type_in != Frictional ||
+     contact_type_in != Frictional || contact_type_in != Soft_Finger) {
+    contact_type_ = DEFAULT_CONTACT_TYPE;
+  } else {
+    contact_type_ = contact_type_in;
+  }
+  if(model_type_in != Undefined_MT || model_type_in != Single_Point || model_type_in != Multi_Point) {
+    model_type_ = DEFAULT_CONTACT_MODEL_TYPE;
+  } else {
+    model_type_ = model_type_in;
+  }
+  if (radius_in < 0) {
+    inclusion_rule_ = InclusionRule(DEFAULT_INCLUSION_RULE_PARAMETER);
+  } else {
+    inclusion_rule_ = InclusionRule(radius_in);
+  }
+}
 //--------------------------------------------------------------------------
 FingerParameters& FingerParameters::operator=(FingerParameters const& src)
 {
   if (this !=&src)
     {
+      name_ = src.name_;
       force_magnitude_=src.force_magnitude_;
       disc_=src.disc_;
       mu_0_=src.mu_0_;
@@ -180,6 +261,7 @@ std::ostream& operator<<(std::ostream &stream,FingerParameters const& param)
   else rule_type="Warning in FingerParameters: Invalid rule type!";
 
   stream <<'\n'<<"FINGER PARAMETERS: "<<'\n'
+	 <<"Name: " << param.name_ << '\n'
          <<"Force magnitude: " << param.force_magnitude_ <<'\n'
          <<"Discretization: "<<param.disc_<<'\n'
          <<"Mu_0: "<<param.mu_0_<<'\n'
@@ -187,7 +269,7 @@ std::ostream& operator<<(std::ostream &stream,FingerParameters const& param)
          <<"Contact type: "<<contact_type<<'\n'
          <<"Model type: "<<model_type<<'\n'
          <<"Inclusion rule type: "<<rule_type<<'\n'
-         <<"Inclusion rule parameter: "<<param.inclusion_rule_.rule_parameter_<<'\n'<<'\n';
+         <<"Inclusion rule parameter: "<<param.inclusion_rule_.rule_parameter_<<'\n'<< std::endl;
 
   return stream;
 }        
@@ -224,12 +306,48 @@ void FingerParameters::setSoftFingerContact(double force_magnitude,uint disc,dou
   mu_T_=mu_T;
   contact_type_=Soft_Finger;
 }
+
+void FingerParameters::setContactType(ContactType contact_type_in) {
+  contact_type_ = contact_type_in;
+}
+
+void FingerParameters::setContactType(string &contact_type_in) {
+  if (contact_type_in.compare("Frictionless") == 0) {
+    contact_type_ = Frictionless;
+  } else if (contact_type_in.compare("Frictional") == 0) {
+    contact_type_ = Frictional;
+  } else if (contact_type_in.compare("Soft_Finger") == 0) {
+    contact_type_ = Soft_Finger;
+  } else {
+    contact_type_ = Undefined_CT;
+  } 
+}
+
 //--------------------------------------------------------------------------
 void FingerParameters::setContactModelType(ModelType model_type){model_type_=model_type;}
+
+void FingerParameters::setContactModelType(std::string &model_type_in){
+  if (model_type_in.compare("Single_Point") == 0) {
+    model_type_=Single_Point;
+  } else if (model_type_in.compare("Multi_Point") == 0) {
+    model_type_=Single_Point;
+  } else {
+    model_type_=Undefined_MT;
+  }
+}
 //--------------------------------------------------------------------------
 void FingerParameters::setInclusionRule(InclusionRule const& inclusion_rule){inclusion_rule_=inclusion_rule;}
 //--------------------------------------------------------------------------
 void FingerParameters::setInclusionRuleType(RuleType rule_type){inclusion_rule_.rule_type_=rule_type;}
+
+void FingerParameters::setInclusionRuleType(std::string &rule_type_in) {
+  if (rule_type_in.compare("Sphere") == 0) {
+    inclusion_rule_.rule_type_=Sphere;
+  } else {
+    inclusion_rule_.rule_type_=Undefined_RT;
+  }
+}
+
 //--------------------------------------------------------------------------
 void FingerParameters::setInclusionRuleParameter(uint rule_parameter){inclusion_rule_.rule_parameter_=rule_parameter;}
 //--------------------------------------------------------------------------
@@ -242,20 +360,20 @@ uint FingerParameters::getDisc()const{return disc_;}
 double FingerParameters::getMu0()const{return mu_0_;}
 //--------------------------------------------------------------------------
 double FingerParameters::getMuT()const{return mu_T_;}
-//--------------------------------------------------------------------------
+//-------------------------------------------------------------------
 ContactType FingerParameters::getContactType()const{return contact_type_;}
-//--------------------------------------------------------------------------
+//-------------------------------------------------------------------
 ModelType FingerParameters::getModelType()const{return model_type_;}
-//--------------------------------------------------------------------------
+//-------------------------------------------------------------------
 InclusionRule const* FingerParameters::getInclusionRule()const{return &inclusion_rule_;}
-//--------------------------------------------------------------------------
+//-------------------------------------------------------------------
 RuleType FingerParameters::getInclusionRuleType()const{return inclusion_rule_.rule_type_;}
-//--------------------------------------------------------------------------
+//-------------------------------------------------------------------
 uint FingerParameters::getInclusionRuleParameter()const{return inclusion_rule_.rule_parameter_;}
-//--------------------------------------------------------------------------
+//-------------------------------------------------------------------
 bool FingerParameters:: getInclusionRuleFilterPatch()const{return inclusion_rule_.filter_inside_points_;}
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 Finger::Finger() : c_model_(NULL), centerpoint_id_(0), initialized_(false)
 {
   FingerParameters default_param;
@@ -271,7 +389,10 @@ Finger::Finger() : c_model_(NULL), centerpoint_id_(0), initialized_(false)
     }
 }
 //--------------------------------------------------------------------------
-Finger::Finger(FingerParameters const& param) : c_model_(NULL), centerpoint_id_(0), initialized_(false)
+Finger::Finger(FingerParameters const& param) : 
+  c_model_(NULL), 
+  centerpoint_id_(0), 
+  initialized_(false)
 {
   if (param.getModelType()==Single_Point)
     c_model_=new PointContactModel(param); 

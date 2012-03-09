@@ -210,18 +210,20 @@ uint IndependentContactRegions::getNumContactRegions()const{return num_contact_r
 //--------------------------------------------------------------------
 const SearchZonesPtr IndependentContactRegions::getSearchZones()const{return search_zones_;}
 //--------------------------------------------------------------------
-const GraspPtr IndependentContactRegions::getGrasp()const{return grasp_;}
-//--------------------------------------------------------------------
 void IndependentContactRegions::setSearchZones(SearchZonesPtr sz_in)
 {
   clear();
   search_zones_ = sz_in;
 }
-  //--------------------------------------------------------------------
+//--------------------------------------------------------------------
 void IndependentContactRegions::setGrasp(GraspPtr g_in) 
 {
   clear();
   grasp_ = g_in;
 }
+//--------------------------------------------------------------------
+  bool IndependentContactRegions::hasInitializedGrasp() {
+    return (grasp_ != NULL && grasp_->isInitialized());
+  }
 
 }//namespace ICR

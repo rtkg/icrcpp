@@ -143,6 +143,8 @@ uint Grasp::getNumFingers()const{return num_fingers_;}
 void Grasp::init(FParamList const& f_param_list,const TargetObjectPtr obj,VectorXui const& centerpoint_ids)
 {
   assert(f_param_list.size()>0);
+  std::cout << f_param_list.size() << " " 
+	    << (uint)centerpoint_ids.size() << std::endl;
   assert(f_param_list.size()==(uint)centerpoint_ids.size());
   assert((bool)obj);
 

@@ -49,7 +49,11 @@ class IndependentContactRegions
   ContactRegion const* getContactRegion(uint id)const;
   uint getNumContactRegions()const;
   const SearchZonesPtr getSearchZones()const;
-  const GraspPtr getGrasp()const;
+  const GraspPtr getGrasp()const {return grasp_;}
+  GraspPtr getGrasp() {return grasp_;}
+  /** \brief True if exists pointer to an initialized grasp \ref ICR::Grasp::init()
+   */
+  bool hasInitializedGrasp(); 
   /** \brief Sets new search zones for this icr. Clears previously
    *   calculated regions.
    */
