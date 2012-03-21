@@ -1,9 +1,3 @@
-/** \file config.h 
- * \brief Holds the default configuration of the
- * finger used in \ref ICR::FingerParameters
- * 
- */
-
 #ifndef config_h___
 #define config_h___
 
