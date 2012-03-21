@@ -46,6 +46,17 @@ void TargetObject::setName(std::string const& name) {name_=name;}
 //--------------------------------------------------------------------
 void TargetObject::reserveCpList(uint num_cp){contact_points_.reserve(num_cp);}
 //--------------------------------------------------------------------
+// void TargetObject::findClosestIdx(double x, double y, double z) {
+//   for (uint i=0; i<num_cp_ ; i++) {
+    
+    
+//   }
+// }
+// //--------------------------------------------------------------------
+// void TargetObject::findClosestIdx(Eigen::Vector3d& pt) {
+
+// }
+//--------------------------------------------------------------------
 uint TargetObject::getNumCp() const {return num_cp_;}
 //--------------------------------------------------------------------
 void TargetObject::addContactPoint(ContactPoint const& point)
