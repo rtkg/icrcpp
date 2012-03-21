@@ -27,7 +27,7 @@ class TargetObject
   uint num_cp_;
   ContactPointList contact_points_;
   
-  uint findClosestIdxCore(double x, double y, double z);
+  //  uint findClosestIdxCore(double x, double y, double z);
 
  public:
 
@@ -44,8 +44,8 @@ class TargetObject
   void setName(std::string const& name);
   uint getNumCp() const;
   void reserveCpList(uint num_cp);
-  uint findClosestIdx(double x, double y, double z);
-  uint findClosestIdx(Eigen::Vector3d& pt);
+  //  uint findClosestIdx(double x, double y, double z);
+  //  uint findClosestIdx(Eigen::Vector3d& pt);
   void addContactPoint(ContactPoint const& point);
   /*!  \brief Multiplies each ICR::ContactPoint#vertex_ of the contact points contained in
  *  ICR::TargetObject#contact_points_ with scale
