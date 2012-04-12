@@ -357,6 +357,8 @@ double FingerParameters::getForceMagnitude()const{return force_magnitude_;}
 //--------------------------------------------------------------------------
 uint FingerParameters::getDisc()const{return disc_;}
 //--------------------------------------------------------------------------
+uint FingerParameters::getName()const{return name_;}
+//--------------------------------------------------------------------------
 double FingerParameters::getMu0()const{return mu_0_;}
 //--------------------------------------------------------------------------
 double FingerParameters::getMuT()const{return mu_T_;}
@@ -406,13 +408,14 @@ Finger::Finger(FingerParameters const& param) :
 }
 //--------------------------------------------------------------------------
 Finger::Finger(Finger const& src) : c_model_(src.c_model_), ows_(src.ows_), patches_(src.patches_),
-				    centerpoint_id_(src.centerpoint_id_), initialized_(src.initialized_){}
+				    centerpoint_id_(src.centerpoint_id_), initialized_(src.initialized_),name_("default"){}
 //--------------------------------------------------------------------------
 Finger& Finger::operator=(const Finger& src)		  
 {
   if (this !=&src)
     {
       c_model_=src.c_model_;
+      name_=src.name_;
       ows_=src.ows_;
       patches_=src.patches_;
       centerpoint_id_=src.centerpoint_id_;
@@ -443,6 +446,10 @@ Patch const* Finger::getCenterPointPatch()const{return (*patches_.get())[centerp
 Patch const* Finger::getPatch(uint id)const{return (*patches_.get())[id];}
 //--------------------------------------------------------------------------
 const OWSPtr Finger::getOWS()const{return ows_;}
+//--------------------------------------------------------------------------
+string Finger::getName()const{return name_;}
+//--------------------------------------------------------------------------
+void Finger::setName(std::string name){name_=name;}
 //--------------------------------------------------------------------------
 PointContactModel const* Finger::getContactModel()const{return c_model_;}
 //--------------------------------------------------------------------------

@@ -187,6 +187,7 @@ class FingerParameters
   void setInclusionRuleFilterPatch(bool filter_inside_points);
 
   double getForceMagnitude()const;
+  string getName()const;
   uint getDisc()const;
   double getMu0()const;
   double getMuT()const;
@@ -209,7 +210,8 @@ class FingerParameters
 class Finger
 {
  private:
-  
+
+  string name_;
   PointContactModel* c_model_;
   OWSPtr ows_;
   PatchListPtr patches_;
@@ -235,6 +237,8 @@ class Finger
   PointContactModel* getContactModel(); 
   uint getCenterPointId()const;
   bool isInitialized()const;
+  string getName()const;
+  void setName(string const & name);
 
 };
 //---------------------------------------------------------------------

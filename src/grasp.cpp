@@ -131,6 +131,8 @@ void Grasp::addFinger(FingerParameters const& param, uint centerpoint_id)
 {
   Finger* new_finger=new Finger(param); 
 
+
+  new_finger->setName(param.getName());
   new_finger->init(centerpoint_id,computePatches(new_finger),computeOWS(new_finger));
   num_grasp_wrenches_+=(new_finger->getCenterPointPatch()->patch_ids_.size())*(new_finger->getContactModel()->getLimitSurface()->getNumPrimitiveWrenches());
   fingers_.push_back(new_finger); 
