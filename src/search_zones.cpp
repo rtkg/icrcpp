@@ -116,9 +116,12 @@ void SearchZones::clear()
       delete search_zones_[finger_id];
     }
   search_zones_.clear();
+<<<<<<< HEAD
   num_search_zones_ = 0;
   search_zones_computed_ = false;
 
+=======
+>>>>>>> e3f5ab58a2f3742cff49516c37f557b603b2456f
 }
 //-------------------------------------------------------------------
 void SearchZones::initializeSearchZones()
