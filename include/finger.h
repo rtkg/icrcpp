@@ -183,7 +183,7 @@ class FingerParameters
   void setInclusionRule(InclusionRule const& inclusion_rule);
   void setInclusionRuleType(RuleType rule_type);
   void setInclusionRuleType(string &rule_type);
-  void setInclusionRuleParameter(uint rule_parameter);
+  void setInclusionRuleParameter(double rule_parameter);
   void setInclusionRuleFilterPatch(bool filter_inside_points);
 
   double getForceMagnitude()const;

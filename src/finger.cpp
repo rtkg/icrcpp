@@ -349,7 +349,7 @@ void FingerParameters::setInclusionRuleType(std::string &rule_type_in) {
 }
 
 //--------------------------------------------------------------------------
-void FingerParameters::setInclusionRuleParameter(uint rule_parameter){inclusion_rule_.rule_parameter_=rule_parameter;}
+void FingerParameters::setInclusionRuleParameter(double rule_parameter){inclusion_rule_.rule_parameter_=rule_parameter;}
 //--------------------------------------------------------------------------
 void FingerParameters::setInclusionRuleFilterPatch(bool filter_inside_points){inclusion_rule_.filter_inside_points_=filter_inside_points;}
 //--------------------------------------------------------------------------
