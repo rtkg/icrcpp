@@ -70,7 +70,7 @@ typedef std::tr1::shared_ptr<SearchZones> SearchZonesPtr;
 typedef std::tr1::shared_ptr<OWS> OWSPtr;
 typedef std::tr1::shared_ptr<std::vector<Patch*> > PatchListPtr;
 typedef std::vector<std::tr1::shared_ptr<Finger> > FingerPtrList;
-typedef std::vector<std::tr1::shared_ptr<IndependentContactRegions> > IndependentContactRegionsPtr;
+typedef std::tr1::shared_ptr<IndependentContactRegions>  IndependentContactRegionsPtr;
 
 Eigen::Matrix3d skewSymmetricMatrix(Eigen::Vector3d vector);
 uint factorial(uint x);
