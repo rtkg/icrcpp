@@ -13,7 +13,6 @@
 namespace ICR
 {
 
-<<<<<<< HEAD
 IndependentContactRegions::IndependentContactRegions() :  
   icr_computed_(false),
   num_contact_regions_(0) {contact_regions_.clear();}
@@ -23,31 +22,18 @@ IndependentContactRegions::IndependentContactRegions(const SearchZonesPtr search
   grasp_(grasp),
   icr_computed_(false), 
   num_contact_regions_(0)
-=======
-//--------------------------------------------------------------------
-//--------------------------------------------------------------------
-IndependentContactRegions::IndependentContactRegions() :  icr_computed_(false),num_contact_regions_(0) {contact_regions_.clear();}
-//--------------------------------------------------------------------
-IndependentContactRegions::IndependentContactRegions(const SearchZonesPtr search_zones,const GraspPtr grasp) : search_zones_(search_zones), grasp_(grasp), 
-								     icr_computed_(false), num_contact_regions_(0)
->>>>>>> e3f5ab58a2f3742cff49516c37f557b603b2456f
 {
   contact_regions_.clear();
   assert((bool)search_zones_);
   assert((bool)grasp_);
 }
 //--------------------------------------------------------------------
-<<<<<<< HEAD
 IndependentContactRegions::IndependentContactRegions(IndependentContactRegions const& src) : 
   search_zones_(src.search_zones_), 
   grasp_(src.grasp_), 
   icr_computed_(src.icr_computed_),
   contact_regions_(src.contact_regions_),
   num_contact_regions_(src.num_contact_regions_){}
-=======
-IndependentContactRegions::IndependentContactRegions(IndependentContactRegions const& src) : search_zones_(src.search_zones_), grasp_(src.grasp_), icr_computed_(src.icr_computed_),
-                           contact_regions_(src.contact_regions_),num_contact_regions_(src.num_contact_regions_){}
->>>>>>> e3f5ab58a2f3742cff49516c37f557b603b2456f
 //--------------------------------------------------------------------
 IndependentContactRegions& IndependentContactRegions::operator=(IndependentContactRegions const& src)
 {
@@ -62,10 +48,7 @@ IndependentContactRegions& IndependentContactRegions::operator=(IndependentConta
 
   return *this;
 }
-<<<<<<< HEAD
 
-=======
->>>>>>> e3f5ab58a2f3742cff49516c37f557b603b2456f
 //--------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& stream, IndependentContactRegions const& icr)
 {
@@ -92,7 +75,6 @@ IndependentContactRegions::~IndependentContactRegions(){clear();}
 //--------------------------------------------------------------------
 void IndependentContactRegions::clear()
 {
-<<<<<<< HEAD
   for(uint i=0;i<contact_regions_.size();i++)
     {
       delete contact_regions_[i];
@@ -100,12 +82,6 @@ void IndependentContactRegions::clear()
   contact_regions_.clear();
   num_contact_regions_ = 0;
   icr_computed_ = false;
-=======
-  for(uint i=0;i<num_contact_regions_;i++)
-    delete contact_regions_[i];
-
-  contact_regions_.clear();
->>>>>>> e3f5ab58a2f3742cff49516c37f557b603b2456f
 }
 //--------------------------------------------------------------------
   bool IndependentContactRegions::primitiveSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
@@ -234,7 +210,6 @@ uint IndependentContactRegions::getNumContactRegions()const{return num_contact_r
 //--------------------------------------------------------------------
 const SearchZonesPtr IndependentContactRegions::getSearchZones()const{return search_zones_;}
 //--------------------------------------------------------------------
-<<<<<<< HEAD
 void IndependentContactRegions::setSearchZones(SearchZonesPtr sz_in)
 {
   clear();
@@ -251,9 +226,4 @@ void IndependentContactRegions::setGrasp(GraspPtr g_in)
     return (grasp_ != NULL && grasp_->isInitialized());
   }
 
-=======
-const GraspPtr IndependentContactRegions::getGrasp()const{return grasp_;}
-//--------------------------------------------------------------------
-//--------------------------------------------------------------------
->>>>>>> e3f5ab58a2f3742cff49516c37f557b603b2456f
 }//namespace ICR
