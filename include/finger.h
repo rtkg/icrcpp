@@ -211,12 +211,12 @@ class Finger
 {
  private:
 
-  string name_;
   PointContactModel* c_model_;
   OWSPtr ows_;
   PatchListPtr patches_;
   uint centerpoint_id_;
   bool initialized_;
+  string name_;
 
  public:
 

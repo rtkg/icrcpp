@@ -357,7 +357,7 @@ double FingerParameters::getForceMagnitude()const{return force_magnitude_;}
 //--------------------------------------------------------------------------
 uint FingerParameters::getDisc()const{return disc_;}
 //--------------------------------------------------------------------------
-uint FingerParameters::getName()const{return name_;}
+std::string FingerParameters::getName()const{return name_;}
 //--------------------------------------------------------------------------
 double FingerParameters::getMu0()const{return mu_0_;}
 //--------------------------------------------------------------------------
@@ -376,7 +376,7 @@ uint FingerParameters::getInclusionRuleParameter()const{return inclusion_rule_.r
 bool FingerParameters:: getInclusionRuleFilterPatch()const{return inclusion_rule_.filter_inside_points_;}
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-Finger::Finger() : c_model_(NULL), centerpoint_id_(0), initialized_(false)
+Finger::Finger() : c_model_(NULL), centerpoint_id_(0), initialized_(false), name_("default")
 {
   FingerParameters default_param;
 
@@ -415,11 +415,11 @@ Finger& Finger::operator=(const Finger& src)
   if (this !=&src)
     {
       c_model_=src.c_model_;
-      name_=src.name_;
       ows_=src.ows_;
       patches_=src.patches_;
       centerpoint_id_=src.centerpoint_id_;
       initialized_=src.initialized_;
+      name_=src.name_;
     }
   return *this;
 }
@@ -449,7 +449,7 @@ const OWSPtr Finger::getOWS()const{return ows_;}
 //--------------------------------------------------------------------------
 string Finger::getName()const{return name_;}
 //--------------------------------------------------------------------------
-void Finger::setName(std::string name){name_=name;}
+void Finger::setName(std::string const & name){name_=name;}
 //--------------------------------------------------------------------------
 PointContactModel const* Finger::getContactModel()const{return c_model_;}
 //--------------------------------------------------------------------------
