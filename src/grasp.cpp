@@ -8,7 +8,7 @@ namespace ICR
 {
 //------------------------------------------------------------------
 //------------------------------------------------------------------
-  Grasp::Grasp() : initialized_(false) , gws_(NULL),num_fingers_(0),num_grasp_wrenches_(0){}
+Grasp::Grasp() : initialized_(false) , gws_(NULL),num_fingers_(0),num_grasp_wrenches_(0){}
 //------------------------------------------------------------------
 Grasp::Grasp(Grasp const& src) :  fingers_(src.fingers_), initialized_(src.initialized_),
                                   obj_(src.obj_),gws_(src.gws_),num_fingers_(src.num_fingers_),num_grasp_wrenches_(src.num_grasp_wrenches_) {}
