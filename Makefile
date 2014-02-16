@@ -7,8 +7,8 @@
 
 CC       = gcc
 CXX      = g++
-CFLAGS   = -pipe -Wall -W -O2 -fPIC 
-CXXFLAGS = -pipe -Werror -Wall -Wcast-qual -W  -Wextra -Wwrite-strings -Wno-sign-conversion -O3 -g -fPIC -msse2 -std=gnu++0x 
+CFLAGS   = -pipe -w -O3 -fPIC #-pipe -Wall -W -O2 -fPIC 
+CXXFLAGS = -pipe -w -O3 -g -fPIC -msse2 -std=gnu++0x  #-pipe -Wall -Wcast-qual -W  -Wextra -Wwrite-strings -Wno-sign-conversion -O3 -g -fPIC -msse2 -std=gnu++0x 
 AR       = ar cqs 
 DEL_FILE = rm -f
 
@@ -18,9 +18,19 @@ ODIR = obj
 
 ####### Include directories for library headers
 
+#-I /opt/ros/electric/stacks/perception_pcl/pcl/include/pcl-1.1/ -I`cmake -P /opt/ros/electric/stacks/perception_pcl/pcl/vtk_include.cmake`" lflags="-L`cmake -P /opt/ros/electric/stacks/perception_pcl/pcl/vtk_library.cmake` -Wl,-rpath,/opt/ros/electric/stacks/perception_pcl/pcl/lib64 -L/opt/ros/electric/stacks/perception_pcl/pcl/lib64 -Wl,-rpath,/opt/ros/electric/stacks/perception_pcl/pcl/lib -L/opt/ros/electric/stacks/perception_pcl/pcl/lib -lpcl_common -lpcl_filters -lpcl_features -lpcl_io -lpcl_surface -lpcl_registration -lpcl_sample_consensus -lpcl_kdtree -lpcl_segmentation -lpcl_keypoints -lpcl_range_image -lpcl_range_image_border_extractor -lpcl_visualization -lpcl_octree
+
+
+
 INCPATH  = -I ./tools/eigen-eigen-3.0.2/ #eigen headers
 INCPATH += -I /usr/local/include/libqhullcpp  #qhull headers
 INCPATH += -I /usr/local/include #libobj headers
+INCPATH += -I /usr/include/vtk-5.8 #vtk headers
+INCPATH += -I /usr/local/include/pcl-1.6 #pcl headers
+INCPATH += -I /opt/ros/fuerte/include
+
+#LIBPCL = #-L/usr/local/lib #-lpcl_filters
+
 
 ####### Files for compiling the code
 
@@ -111,7 +121,7 @@ $(ODIR)/target_object.o: ./src/target_object.cpp ./include/target_object.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(ODIR)/target_object.o ./src/target_object.cpp
 
 $(ODIR)/object_loader.o: ./src/object_loader.cpp ./include/object_loader.h 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(ODIR)/object_loader.o ./src/object_loader.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) $(LIBPCL) -o $(ODIR)/object_loader.o ./src/object_loader.cpp 
 
 $(ODIR)/wrench_cone.o: ./src/wrench_cone.cpp ./include/wrench_cone.h 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(ODIR)/wrench_cone.o ./src/wrench_cone.cpp

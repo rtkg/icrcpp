@@ -10,7 +10,8 @@ int main()
    //Load a new target object 
    ObjectLoader obj_loader;
    obj_loader.loadObject("../models/beer_can.obj","beer_can");
- 
+   WrenchCone c;
+
    //Create a list of 5 default finger parameters (default parameters defined in config.h) and a 
    //vector of centerpoint contact id's for the 5-fingered prototype grasp
    FParamList f_parameters;

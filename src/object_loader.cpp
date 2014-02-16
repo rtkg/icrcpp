@@ -2,6 +2,14 @@
 #include "../include/debug.h"
 #include <math.h>
 #include <assert.h>
+//#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/common/common_headers.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/console/parse.h>
+
+
 
 namespace ICR
 {
@@ -12,9 +20,9 @@ bool face_callback_run=false;
 Eigen::VectorXi map_normal2vertex;
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------
-ObjectLoader::ObjectLoader() : object_(new TargetObject()),object_loaded_(false){}
+  ObjectLoader::ObjectLoader() : object_(new TargetObject()),object_loaded_(false), object_filtered_(false){}
 //--------------------------------------------------------------------
-ObjectLoader::ObjectLoader(ObjectLoader const& src) : object_(src.object_), object_loaded_(src.object_loaded_) {}
+  ObjectLoader::ObjectLoader(ObjectLoader const& src) : object_(src.object_), object_loaded_(src.object_loaded_), object_filtered_(src.object_filtered_) {}
 //--------------------------------------------------------------------
 ObjectLoader& ObjectLoader::operator=(ObjectLoader const& src)
 {
@@ -298,6 +306,126 @@ void ObjectLoader::polygonal_face_geometric_vertices_texture_vertices_vertex_nor
  std::cout<<"\n"<<"Error in ObjectLoader - polygonal_face_geometric_vertices_texture_vertices_vertex_normals_end_callback is only a dummy implementation. Provide an .obj file with a triangulated mesh. Exiting..."<<std::endl;
  exit(1);
 }
+//--------------------------------------------------------------------
+void ObjectLoader::filterObject(double a)
+{
+  assert(object_loaded_);
+
+  ContactPointList neighbors;
+  pcl::PointCloud<pcl::PointNormal>::Ptr point_cloud (new pcl::PointCloud<pcl::PointNormal>);
+  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+
+  contactPointList2PclPointNormalCloud(object_->contact_points_,point_cloud);
+  contactPointList2PclNormalCloud(object_->contact_points_,cloud_normals);
+
+  pcl::visualization::PCLVisualizer* viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointNormal> point_cloud_green (point_cloud, 0, 255, 0);
+  viewer->addPointCloud<pcl::PointNormal> (point_cloud,point_cloud_green,"complete_object");
+
+
+  viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "complete_object");
+  viewer->setBackgroundColor (0, 0, 0);
+  viewer->initCameraParameters ();
+  viewer->addCoordinateSystem (50.0);
+  //  viewer->addPointCloudNormals(cloud_normals);
+  viewer->addPointCloudNormals<pcl::PointNormal, pcl::Normal> (point_cloud, cloud_normals, 1, 10, "normals");
+
+
+
+
+  for (unsigned int point_id=0; point_id < object_->getNumCp(); point_id++)
+    {      
+      getNeighborsInWindow( point_id, a, neighbors);
+     
+      //   for (unsigned int i=0; i<neighbors.size(); i++)
+      // 	std::cout<<neighbors[i]->getId()<<" ";
+
+      //   std::cout<<std::endl;
+
+      contactPointList2PclPointNormalCloud(neighbors,point_cloud);
+
+      viewer->addPointCloud<pcl::PointNormal> (point_cloud,"patch");
+      viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 6, "patch");
+      
+      
+      // while (!viewer->wasStopped ())
+      // {
+      viewer->spinOnce (10000);
+      // boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+      std::cout<<"updating"<<std::endl;
+      //}
+      viewer->removePointCloud("patch");
+    }
+
+
+  delete viewer;
+  object_filtered_=true;
+
+}
+//--------------------------------------------------------------------
+  void ObjectLoader::getNeighborsInWindow(unsigned int point_id, double a, ContactPointList& neighbors)
+  {
+    neighbors.clear();
+    VectorXui explored_cp=VectorXui::Zero(object_->getNumCp(),1); //set all entries to not explored
+    std::list<Node> nodes;
+    nodes.push_back(Node(const_cast<ContactPoint*>(object_->getContactPoint(point_id)))); //push the node corresponding to the current point
+    neighbors.push_back(const_cast<ContactPoint*>(object_->getContactPoint(point_id)));
+    explored_cp(point_id)=1; //set to explored
+
+    while(nodes.size() > 0)
+      {   
+	for(ConstIndexListIterator neighbor=nodes.front().contact_point_->getNeighborItBegin(); neighbor != nodes.front().contact_point_->getNeighborItEnd(); neighbor++)      
+      	  if(explored_cp(*neighbor)==0) 
+	    { 
+	      explored_cp(*neighbor)=1;
+	      if(((*(object_->getContactPoint(point_id)->getVertex())) - (*(object_->getContactPoint(*neighbor)->getVertex()))).norm() <= a) //check if point is inside the window centered at point_id
+      		{                     
+      		  nodes.push_back(Node(const_cast<ContactPoint*>(object_->getContactPoint(*neighbor))));
+                  neighbors.push_back(const_cast<ContactPoint*>(object_->getContactPoint(*neighbor)));	 
+      		}
+	    }
+	nodes.pop_front();
+      }
+
+  }
+//--------------------------------------------------------------------
+  void ObjectLoader::contactPointList2PclPointNormalCloud(ContactPointList const & contact_points,pcl::PointCloud<pcl::PointNormal>::Ptr point_cloud)
+  {
+    point_cloud->clear();
+    pcl::PointNormal p;
+
+    for (unsigned int i=0; i<contact_points.size(); i++)
+      {
+	p.x= contact_points[i]->getVertex()->x();
+	p.y= contact_points[i]->getVertex()->y();
+	p.z= contact_points[i]->getVertex()->z();
+
+	p.normal[0]=contact_points[i]->getVertexNormal()->x();
+	p.normal[1]=contact_points[i]->getVertexNormal()->y();
+	p.normal[2]=contact_points[i]->getVertexNormal()->z();
+
+	point_cloud->push_back(p);
+      }
+  
+  }
+//--------------------------------------------------------------------
+  void ObjectLoader::contactPointList2PclNormalCloud(ContactPointList const & contact_points,pcl::PointCloud<pcl::Normal>::Ptr cloud_normals)
+  {
+    cloud_normals->clear();
+    pcl::Normal n;
+
+    for (unsigned int i=0; i<contact_points.size(); i++)
+      {
+
+
+	n.normal_x=contact_points[i]->getVertexNormal()->x();
+	n.normal_y=contact_points[i]->getVertexNormal()->y();
+	n.normal_z=contact_points[i]->getVertexNormal()->z();
+
+	cloud_normals->push_back(n);
+      }
+  
+  }
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------
 }//namespace ICR

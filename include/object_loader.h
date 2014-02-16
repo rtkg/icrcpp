@@ -4,6 +4,9 @@
 #include "target_object.h"
 #include <iostream>
 #include "obj.hpp"
+#include "finger.h"
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
 namespace ICR
 {
@@ -40,6 +43,7 @@ class ObjectLoader
 
   TargetObjectPtr object_;
   bool object_loaded_;
+  bool object_filtered_;
 
   static void geometric_vertex_callback(obj::float_type x, obj::float_type y, obj::float_type z);
   static void vertex_normal_callback(obj::float_type x, obj::float_type y, obj::float_type z);
@@ -64,6 +68,9 @@ class ObjectLoader
   static void polygonal_face_geometric_vertices_texture_vertices_vertex_normals_vertex_callback(const obj::index_3_tuple_type&);
   static void polygonal_face_geometric_vertices_texture_vertices_vertex_normals_end_callback();
 
+  void getNeighborsInWindow(unsigned int point_id, double a, ContactPointList & neighbors);
+  void contactPointList2PclPointNormalCloud(ContactPointList const & contact_points,pcl::PointCloud<pcl::PointNormal>::Ptr point_cloud);
+   void contactPointList2PclNormalCloud(ContactPointList const & contact_points,pcl::PointCloud<pcl::Normal>::Ptr cloud_normals);
  public:
 
   ObjectLoader();
@@ -73,6 +80,7 @@ class ObjectLoader
   ~ObjectLoader();
 
   void loadObject(std::string const& file,std::string const& name);
+  void filterObject(double a);
   const TargetObjectPtr getObject()const;
   TargetObjectPtr getObject();
   bool objectLoaded()const;
