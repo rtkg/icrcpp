@@ -19,15 +19,15 @@ ODIR = obj
 ####### Include directories for library headers
 
 INCPATH  = -I ./tools/eigen-eigen-3.0.2/ #eigen headers
-INCPATH += -I /usr/local/include/libqhullcpp  #qhull headers
-INCPATH += -I /usr/local/include #libobj headers
+INCPATH += -I ./tools/Qhull-2011.2/src/libqhullcpp #qhull headers
+INCPATH += -I ./tools/obj-1.0 #libobj headers
 
 ####### Files for compiling the code
 
 ICR_HEADERS = 	./include/utilities.h \
 		./include/contact_point.h \
 		./include/target_object.h \
-                ./include/object_loader.h \
+            ./include/object_loader.h \
 		./include/wrench_cone.h \
 		./include/limit_surface.h \
 		./include/ows.h \
@@ -44,7 +44,7 @@ ICR_SOURCES = 	./src/utilities.cpp \
 		./src/object_loader.cpp	\
 		./src/wrench_cone.cpp \
 		./src/limit_surface.cpp	\
-                ./src/ows.cpp \
+            ./src/ows.cpp \
 		./src/contact_model.cpp \
 		./src/grasp.cpp \
 		./src/finger.cpp \
