@@ -1,0 +1,6 @@
+[submodule "tools/obj-1.0"]
+	path = tools/obj-1.0
+	url = https://github.com/rtkg/obj-1.0
+[submodule "tools/Qhull-2011.2"]
+	path = tools/Qhull-2011.2
+	url = https://github.com/rtkg/Qhull-2011.2
