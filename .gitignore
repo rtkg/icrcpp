@@ -29,6 +29,7 @@ build/*/MinSizeRel/*
 build/*/RelWithDebInfo/*
 doc/html
 tools/
+examples/ex
 *.a
 *.dll
 *.lib
