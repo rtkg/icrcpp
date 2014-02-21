@@ -21,11 +21,14 @@ DEBUG_QHULL If Qhull produces an error, which can happen e.g. if a prototype-gra
 
 Installation Instructions
 *************************
-icrcpp: Published on git@github.com:rtkg/icrcpp.git, tarball available from https://nodeload.github.com/rtkg/icrcpp/tarball/master; cd into the root folder and type make. For clean-up type make clean. To generate the documentation, run Doxygen in the /icrcpp/doc folder. An example is provided in/icrcpp/examples/src. To build it, cd into /icrcpp/examples and type make. Run the compiled example with ./ex, clean-up works with make-clean.
+Easiest way to install is via the install.sh bash script in the root folder which installs the following libraries locally (in the root folder, git submodule init and git submodule update need to be run before, in order to clone the auxiliary libraries):
+
 
 libobj-0.1: Republished on git@github.com:rtkg/obj-1.0.git, tarball available from https://nodeload.github.com/rtkg/obj-1.0/tarball/master; In the root folder type ./configure, make , sudo make install. Note that in this version in the file /obj-0.1/obj/obj_parser.hpp the original typedef statement before the enum in line 50 was deleted, since it is superfluous and creates an error when compiling with the -Werr flag. In the root folder run ./configure --prefix=`pwd`/build, then make, make install
 
 Qhull 2011.1: Republished on git@github.com:rtkg/Qhull-2011.2.git, tarball available from https://nodeload.github.com/rtkg/Qhull-2011.2/tarball/master; In the root folder type make, sudo make install; Compared to the original version, the compiler optimization flags were changed from -O2 to -O3 which results in some speed-up when computing convex hulls with many input points. Also, in this version qh_QHpointer 1 in /Qhull-2011.2/src/libqhull/user.h was defined. This is necessary to use the C++ interface. In the root folder, run cmake -DCMAKE_INSTALL_PREFIX=`pwd`/build, then make, make install
+
+icrcpp: Published on git@github.com:rtkg/icrcpp.git, tarball available from https://nodeload.github.com/rtkg/icrcpp/tarball/master; cd into the root folder and type make. For clean-up type make clean. To generate the documentation, run Doxygen in the /icrcpp/doc folder. An example is provided in/icrcpp/examples/src. To build it, cd into /icrcpp/examples and type make. Run the compiled example with ./ex, clean-up works with make-clean.
 
 For more information and clean-up, see the Readme-files of the aforementioned packages. the /build/lib directories of Qhull-2011.2 and obj-1.0 need to be included in the LD_LIBRARY_PATH. In case of different installation directories, The include statements in the /icrcpp/Makefile need to be changed accordingly.
 
