@@ -19,7 +19,7 @@ ODIR = obj
 ####### Include directories for library headers
 
 INCPATH  = -I ./tools/eigen-eigen-3.0.2            #eigen headers
-INCPATH += -I ./tools/Qhull-2011.2/build/include   #qhull headers
+INCPATH += -I ./tools/Qhull-2011.2/src             #qhull headers
 INCPATH += -I ./tools/obj-1.0/build/include        #libobj headers
 
 ####### Files for compiling the code

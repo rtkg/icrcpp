@@ -5,9 +5,10 @@ git checkout master
 ./configure --prefix=`pwd`/build
 make 
 make install
-#cd ../Qhull-2011.2/
-#make
-#cd ../../
-#make
-#cd examples
-#make
+cd ../Qhull-2011.2/
+make
+make clean
+cd ../../
+make
+cd examples
+make
