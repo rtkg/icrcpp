@@ -4,7 +4,7 @@
 #include "utilities.h" 
 #include <Eigen/Core>
 #include <iostream>
-#include "Qhull.h"
+#include <libqhullcpp/Qhull.h>
 
 namespace ICR
 {

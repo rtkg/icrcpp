@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "utilities.h"
-#include "Qhull.h"
+#include <libqhullcpp/Qhull.h>
 
 namespace ICR
 {

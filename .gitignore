@@ -28,7 +28,7 @@ build/*/Debug/*
 build/*/MinSizeRel/*
 build/*/RelWithDebInfo/*
 doc/html
-tools/
+tools
 examples/ex
 *.a
 *.dll
