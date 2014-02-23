@@ -23,10 +23,8 @@ LimitSurface::LimitSurface(double force_magnitude, int disc,double mu_0) : force
   assert(force_magnitude >0);
   assert(mu_0_ > 0); 
   assert(disc_ > 0);
-
   initializeSelectionMatrix();
 
-  addFrictionlessWrench();
   addHardFingerWrenches();
 }
 //--------------------------------------------------------------------
@@ -37,12 +35,11 @@ LimitSurface::LimitSurface(double force_magnitude, int disc, double mu_0,double 
   assert(mu_T_ > 0);
   assert(disc_ > 0);
   assert(force_magnitude > 0);
-
   initializeSelectionMatrix();
 
-  addFrictionlessWrench();
   addHardFingerWrenches();
   addSoftFingerWrenches();
+
 }
 //--------------------------------------------------------------------
 LimitSurface::LimitSurface(LimitSurface const& src) : force_magnitude_(src.force_magnitude_), disc_(src.disc_), 
@@ -98,29 +95,40 @@ void LimitSurface::addFrictionlessWrench()
 //--------------------------------------------------------------------
 void LimitSurface::addHardFingerWrenches()
 {
+  double alpha=atan(mu_0_); //opening-angle of the friction cone
+
+ //add the wrench corresponding to the center force along the normal -> advantageous for the primitive-wrench based inclusion test
+  Eigen::Matrix< double, 6, Eigen::Dynamic > normal_wrench=Eigen::Matrix< double, 6, Eigen::Dynamic >::Zero(6,1);
+  normal_wrench(2)=force_magnitude_*cos(alpha);
+  local_cone_.addWrenches(normal_wrench);
+
+  //add the primitive wrenches corresponding to the edges of the discretized friction cone
   Eigen::Matrix4Xd gen_forces=Eigen::Matrix4Xd::Zero(4,disc_);
- 
   Eigen::RowVectorXd lin=Eigen::RowVectorXd::LinSpaced(Eigen::Sequential,disc_+1,-PI,PI);
   lin.conservativeResize(disc_);
-  double alpha=atan(mu_0_);
   double c_radius =sin(alpha)*force_magnitude_;
   
   gen_forces.row(0)=lin.array().cos()*c_radius;
   gen_forces.row(1)=lin.array().sin()*c_radius;
   gen_forces.row(2).fill(force_magnitude_*cos(alpha));
+
   local_cone_.addWrenches(selection_matrix_*gen_forces);
+
+  // std::cout<<"disc: "<<disc_<<" mu: "<<mu_0_<<" alpha: "<<alpha<<" Generated Forces: "<<std::endl<<gen_forces<<std::endl<<std::endl;
 }
 //--------------------------------------------------------------------
 void LimitSurface::addSoftFingerWrenches()
 {
-  Eigen::Matrix<double,4,2> gen_forces=Eigen::Matrix<double,4,2>::Zero(4,2);
-  
-  gen_forces(2,0)=force_magnitude_;
-  gen_forces(2,1)=force_magnitude_;
-  gen_forces(3,0)=mu_T_*force_magnitude_;
-  gen_forces(3,1)=-mu_T_*force_magnitude_;
+  double alpha=atan(mu_0_); //opening-angle of the friction cone
 
-  local_cone_.addWrenches(selection_matrix_*gen_forces);
+   Eigen::Matrix<double,4,2> gen_forces=Eigen::Matrix<double,4,2>::Zero(4,2);
+  
+   gen_forces(2,0)=force_magnitude_*cos(alpha);
+   gen_forces(2,1)=force_magnitude_*cos(alpha);
+   gen_forces(3,0)=mu_T_*force_magnitude_*cos(alpha);
+   gen_forces(3,1)=-mu_T_*force_magnitude_*cos(alpha);
+   local_cone_.addWrenches(selection_matrix_*gen_forces);
+
 }
 //--------------------------------------------------------------------
 int LimitSurface::getNumPrimitiveWrenches() const {return local_cone_.getNumPrimitiveWrenches();}
