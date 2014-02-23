@@ -47,6 +47,7 @@ enum ContactType {Undefined_CT=1,Frictionless, Frictional, Soft_Finger};
 enum ModelType {Undefined_MT=1,Single_Point,Multi_Point};
 enum RuleType {Undefined_RT=1,Sphere};
 enum WrenchSpaceType {Undefined_WS=1,Discrete,Spherical};
+enum ICRType {Undefined_ICR=1,BFS,Full};
 
 typedef unsigned int uint;
 typedef Eigen::Matrix<double,6,Eigen::Dynamic> Matrix6Xd;

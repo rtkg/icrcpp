@@ -31,7 +31,8 @@ class IndependentContactRegions
  */
   bool primitiveSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const;
   bool searchZoneInclusionTest(uint region_id,Patch const* patch)const;
-  void computeContactRegion(uint region_id);
+  void computeContactRegionBFS(uint region_id);
+  void computeContactRegionFull(uint region_id);
 
  public:
   IndependentContactRegions();
@@ -44,7 +45,7 @@ class IndependentContactRegions
   ~IndependentContactRegions();
 
   void clear();
-  void computeICR();
+  void computeICR(ICRType type);
   bool icrComputed()const;
   ContactRegion const* getContactRegion(uint id)const;
   uint getNumContactRegions()const;

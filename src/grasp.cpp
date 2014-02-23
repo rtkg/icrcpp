@@ -100,7 +100,8 @@ PatchListPtr Grasp::computePatches(Finger* new_finger)
       patches=PatchListPtr(new std::vector<Patch* >);
       patches->reserve(obj_->getNumCp());
       for(uint centerpoint_id=0; centerpoint_id < obj_->getNumCp();centerpoint_id++)
-	(*patches.get())[centerpoint_id]= new Patch(centerpoint_id,*obj_,*dynamic_cast<MultiPointContactModel*>(new_finger->getContactModel())->getInclusionRule());
+	patches->push_back(new Patch(centerpoint_id,*obj_,*dynamic_cast<MultiPointContactModel*>(new_finger->getContactModel())->getInclusionRule()));
+
     }
   else
     {

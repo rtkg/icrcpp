@@ -87,7 +87,10 @@ std::ostream& operator<<(std::ostream& stream, Node const& node)
 //--------------------------------------------------------------------------
 Patch::Patch(){}
 //--------------------------------------------------------------------------
-Patch::Patch(uint centerpoint_id){patch_ids_.push_back(centerpoint_id);}
+Patch::Patch(uint centerpoint_id)
+{
+patch_ids_.push_back(centerpoint_id);
+}
 //--------------------------------------------------------------------------
 Patch::Patch(uint centerpoint_id,TargetObject const& obj, InclusionRule const& rule)
 {
@@ -117,8 +120,8 @@ Patch::Patch(uint centerpoint_id,TargetObject const& obj, InclusionRule const& r
 		}
 	      else
 		{
-                 //If not all neighbors of the investigated node qualify for patch inclusion, the contact point associated with the node
-                 //is a border point of the patch.
+		  //If not all neighbors of the investigated node qualify for patch inclusion, the contact point associated with the node
+		  //is a border point of the patch.
 		  nodes.front().inside_patch_=false; 
 		  explored_cp(*neighbor)=EXPLORED_UNQUALIFIED;
 		}
@@ -134,11 +137,17 @@ Patch::Patch(uint centerpoint_id,TargetObject const& obj, InclusionRule const& r
 	    patch_ids_.push_back(nodes.front().contact_point_->getId());
 	}
       else
-	  patch_ids_.push_back(nodes.front().contact_point_->getId());
+	patch_ids_.push_back(nodes.front().contact_point_->getId());
 
       nodes.pop_front();
     }
-}
+
+// std::cout<<"centerpoint_id: "<<centerpoint_id<<std::endl<<"patch_ids_: ";
+// for (std::list<uint>::const_iterator iterator = patch_ids_.begin(); iterator != patch_ids_.end(); ++iterator) {
+//   std::cout << *iterator<<" ";}
+
+//   std::cout<<std::endl<<std::endl;
+ }
 //--------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& stream,Patch const& patch)
 {

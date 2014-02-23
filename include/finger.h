@@ -95,7 +95,7 @@ struct Node
 struct Patch
 {
   IndexList patch_ids_;
-  
+
   Patch();
 /*! 
  *  centerpoint_id states the id of the ICR::ContactPoint at which the patch is centered

@@ -39,12 +39,6 @@
  *
  * \section todo_sec ToDo
  *
- * - Add a member function computeFullICR() to ICR::IndependentContactRegions. This function should
- *    check all contact points for icr-inclusion instead of applying breadth-first exploration from
- *    the initial center-points as ICR::IndependentContactRegions::computeICR does. This would allow
- *    transferring ICR::SearchZones and synthesizing regions on novel objects. Another possibility
- *    would be to randomly explore points on an unknown object until one point is found eligible for
- *    inclusion in a region. Then the BFS scheme could start from this point for the respective region.
  *
  *- In the ICR::ObjectLoader class, implement the callbacks allowing to read .obj files with texture
  *   information. Right now, program execution is stopped by an attempt to load an .obj file
