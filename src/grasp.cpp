@@ -50,8 +50,8 @@ void Grasp::clear()
 //------------------------------------------------------------------
 void Grasp::computeGWS()
 {
-  double* wrenches=new double[num_grasp_wrenches_*gws_->getDimension()];
-  double* wrench_it=wrenches;
+  SharedDoublePtr wrenches(new double[num_grasp_wrenches_*gws_->getDimension()]);
+  double* wrench_it=wrenches.get();
   uint wrench_cone_cardinality=0;
   //ConstIndexListIterator curr_pt;
 
@@ -66,9 +66,10 @@ void Grasp::computeGWS()
           wrench_it+=gws_->getDimension()*wrench_cone_cardinality;
  	}
     }  
-  
-  gws_->computeConvexHull(wrenches,num_grasp_wrenches_);
-  delete[] wrenches;
+
+  gws_->setWrenches(wrenches,num_grasp_wrenches_);
+  gws_->computeConvexHull();
+
 }
 //------------------------------------------------------------------
 PatchListPtr Grasp::computePatches(Finger* new_finger)
@@ -152,7 +153,7 @@ void Grasp::init(FParamList const& f_param_list,const TargetObjectPtr obj,Vector
   if(initialized_)//Clean up possible previous grasp
     clear();
 
-  gws_=new DiscreteWrenchSpace();
+  gws_=new DiscreteWrenchSpace(6); //Hard coded for 6D wrench space right now - should be changed to allow for 3D wrenches associated to 2D grasps ...
 
   num_fingers_=f_param_list.size();
   for (uint i=0;i < num_fingers_;i++)
@@ -175,7 +176,7 @@ void Grasp::setCenterPointId(uint finger_id,uint centerpoint_id)
  fingers_.at(finger_id)->setCenterPointId(centerpoint_id);
  num_grasp_wrenches_+=(fingers_.at(finger_id)->getCenterPointPatch()->patch_ids_.size())*(fingers_.at(finger_id)->getContactModel()->getLimitSurface()->getNumPrimitiveWrenches());
  delete gws_; //old gws_ needs to be deleted, since DiscreteWrenchSpace::conv_hull_.runQhull() can only be executed once in the lifetime of conv_hull_
- gws_ = new DiscreteWrenchSpace();
+ gws_ = new DiscreteWrenchSpace(6);
  computeGWS();
 }
 //------------------------------------------------------------------
@@ -193,7 +194,7 @@ void Grasp::setCenterPointIds(VectorXui const& centerpoint_ids)
       num_grasp_wrenches_+=(fingers_.at(finger_id)->getCenterPointPatch()->patch_ids_.size())*(fingers_.at(finger_id)->getContactModel()->getLimitSurface()->getNumPrimitiveWrenches());
     }
  delete gws_; //old gws_ needs to be deleted, since DiscreteWrenchSpace::conv_hull_.runQhull() can only be executed once
- gws_ = new DiscreteWrenchSpace();
+ gws_ = new DiscreteWrenchSpace(6);
   computeGWS();
 }
 //------------------------------------------------------------------

@@ -30,6 +30,7 @@ SearchZones::SearchZones() : tws_(NULL),num_search_zones_(0),search_zones_comput
 //-------------------------------------------------------------------
 SearchZones::SearchZones(const GraspPtr grasp) : grasp_(grasp), tws_(NULL),num_search_zones_(0),search_zones_computed_(false)
 {
+  assert(grasp_->isInitialized());
   assert(grasp_->getGWS()->containsOrigin());
   search_zones_.clear();
 }

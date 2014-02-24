@@ -72,11 +72,24 @@ typedef std::tr1::shared_ptr<OWS> OWSPtr;
 typedef std::tr1::shared_ptr<std::vector<Patch*> > PatchListPtr;
 typedef std::vector<std::tr1::shared_ptr<Finger> > FingerPtrList;
 typedef std::tr1::shared_ptr<IndependentContactRegions>  IndependentContactRegionsPtr;
+typedef std::tr1::shared_ptr<double>  SharedDoublePtr;
 
+//--------------------------------------------------------------------
 Eigen::Matrix3d skewSymmetricMatrix(Eigen::Vector3d vector);
+//--------------------------------------------------------------------
 uint factorial(uint x);
+//--------------------------------------------------------------------
 uint dfactorial(uint x);
 //--------------------------------------------------------------------
+/*!
+ * Column-wise conversion from an Eigen::MatrixXd to a double array. Allocates Memory for the array!!! 
+ */
+ void eigenMatrixToDoubleArray(Eigen::MatrixXd const & matrix, double* & array);
+//--------------------------------------------------------------------
+/*!
+ * Column-wise conversion from a double array to an Eigen::MatrixXd
+ */
+ void doubleArrayToEigenMatrix( double * const array, Eigen::MatrixXd & matrix);
 //--------------------------------------------------------------------
 }//namespace ICR
 #endif

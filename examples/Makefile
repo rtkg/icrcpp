@@ -8,8 +8,9 @@ CFLAGS = -pipe -Wall -W  -Wextra -Wwrite-strings -Wno-sign-conversion -O3 -g -fP
 
 LIBS  = -L ../lib -licr                               #include libicr library
 LIBS += -L ../tools/obj-1.0/build/lib -lobj           #include libobj library
+LIBS += -L ../tools/Qhull-2011.2/lib -lqhullcpp       #include qhull C++ library - LINK ORDER MATTERS!!
 LIBS += -L ../tools/Qhull-2011.2/lib -lqhull6         #include qhull C library
-LIBS += -L ../tools/Qhull-2011.2/lib -lqhullcpp       #include qhull C++ library
+
 
 FN=example
 

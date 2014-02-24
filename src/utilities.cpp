@@ -29,4 +29,18 @@ uint dfactorial(uint x)
  
 }
 //--------------------------------------------------------------------
+void eigenMatrixToDoubleArray(Eigen::MatrixXd const & matrix, double* & array)
+{
+  assert((matrix.rows() > 0) && (matrix.cols() > 0));
+ 
+  array=new double[matrix.rows()*matrix.cols()];
+  Eigen::Map<Eigen::MatrixXd>(array,matrix.rows(),matrix.cols())=matrix;
+}
+//--------------------------------------------------------------------
+ void doubleArrayToEigenMatrix( double * const array, Eigen::MatrixXd & matrix)
+ {
+   assert(array != NULL);
+   matrix=Eigen::Map<Eigen::MatrixXd>(array,matrix.rows(),matrix.cols());
+}
+//--------------------------------------------------------------------
 }//namespace ICR

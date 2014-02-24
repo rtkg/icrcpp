@@ -95,12 +95,15 @@ class DiscreteWrenchSpace : public WrenchSpace
   uint num_wrenches_;
   uint num_vtx_;
   uint num_facets_;
+  SharedDoublePtr wrenches_;
 
  public:
 
  friend class SearchZones;
 
   DiscreteWrenchSpace();
+  DiscreteWrenchSpace(uint dimension);
+  DiscreteWrenchSpace(uint dimension,SharedDoublePtr wrenches,uint num_wrenches);
   DiscreteWrenchSpace(DiscreteWrenchSpace const& src);
   DiscreteWrenchSpace& operator=(DiscreteWrenchSpace const& src);
   virtual ~DiscreteWrenchSpace();
@@ -108,12 +111,15 @@ class DiscreteWrenchSpace : public WrenchSpace
 /*! 
  *  Uses Qhull to compute the convex hull over wrenches
  */
-  void computeConvexHull(double const* wrenches,uint num_wrenches);
+  void computeConvexHull();
   orgQhull::Qhull const* getConvexHull()const;
  bool convHullComputed()const;
  uint getNumWrenches()const;
  uint getNumVertices()const;
  uint getNumFacets()const;
+ SharedDoublePtr getWrenches()const;
+
+ void setWrenches(SharedDoublePtr wrenches,uint num_wrenches);
 };
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
