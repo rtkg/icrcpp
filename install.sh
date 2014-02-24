@@ -16,7 +16,6 @@ mkdir build
 cd build
 cmake ..
 make
-make clean
 cd ../../../
 make
 cd examples
