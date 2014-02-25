@@ -1,7 +1,7 @@
+#!/bin/bash 
 git submodule init 
 git submodule update 
 cd tools/obj-1.0/
-#git checkout master
 ./configure --prefix=`pwd`/build
 make 
 make install
