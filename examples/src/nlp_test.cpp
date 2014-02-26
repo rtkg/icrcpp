@@ -20,7 +20,7 @@ uint T=4;
 DiscreteWrenchSpace* tws_;
 
 //-------------------------------------------------------------------------------------------------
-void computeInitialSolution(DMatrix& solution, const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list)
+void computeInitialSolution(DMatrix& initial_solution, const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list)
 {
   //wrenches in Ph_list and Wh_i_list are stored as column - matrices
 
@@ -39,6 +39,19 @@ void computeInitialSolution(DMatrix& solution, const std::vector<std::vector<Eig
 	TW(i,j)=tws_->getWrenches().get()[count];
 	count++;
       }
+
+  //HAAAAAACKKK REPLACE WITH READING QHULL NORMALS FROM THE G>WS
+  std::vector<double*> hps;
+  double n[2]={0.6402,-0.7682};
+  hps.push_back(n);
+  double n2[2]={-0.9950,-0.0995};
+  hps.push_back(n2);
+  double n3[2]={0.2169,0.9762};
+  hps.push_back(n3);
+  double n4[2]={0.9829, -0.1843};
+  hps.push_back(n4);
+
+  //facetT* curr_f=grasp_->getGWS()->conv_hull_.beginFacet().getFacetT();
 
   SXMatrix x = ssym("x",nV); //decision variable vector
   SXMatrix f(1,1); //Objective
@@ -73,8 +86,8 @@ void computeInitialSolution(DMatrix& solution, const std::vector<std::vector<Eig
 	  zh_i_ind[i]=h*nVh+2+L*Ih+i;
 	}
 
-       //================OBJECTIVE========================================
-      f=f+x(eh_ind)-KAPPA*x(zh_i_ind).trans().mul(DMatrix(Ih,1,1));
+      //================OBJECTIVE========================================
+      f=f-x(deh_ind)-KAPPA*x(zh_i_ind).trans().mul(DMatrix(Ih,1,1));
 
       //==================== BOUNDS ========================================
       //de's have to be positive
@@ -87,8 +100,8 @@ void computeInitialSolution(DMatrix& solution, const std::vector<std::vector<Eig
       for (int i=0; i<Ih;i++)
       	lb_x(lmbdh_i_ind[i])=DMatrix(L,1,0);
 
-           //==================== EQUALITY CONSTRAINTS ========================================
-          //Lambda_i have to sum up to one
+      //==================== EQUALITY CONSTRAINTS ========================================
+      //Lambda_i have to sum up to one
       for (int i=0; i<Ih;i++)
 	{
 	  g_lmbde=vertcat(g_lmbde,(x(lmbdh_i_ind[i]).trans()).mul(DMatrix(L,1,1)));
@@ -96,17 +109,37 @@ void computeInitialSolution(DMatrix& solution, const std::vector<std::vector<Eig
 	  lb_g_lmbde=vertcat(lb_g_lmbde,DMatrix(1,1,1));
 	}
   
-           //==================== INEQUALITY CONSTRAINTS ======================================
-   //Constraints involving the task wrenches
+      //==================== INEQUALITY CONSTRAINTS ======================================
+      //Constraints involving the task wrenches
+      DMatrix ah(K,1);
+      for (int k=0; k<K;k++)
+	{
+	  //HAAAAAACKKK REPLACE WITH READING QHULL NORMALS FROM THE G>WS
+	  //        ah(k)=curr_f->normal[k]*(-1);
+	  ah(k)=hps[h][k];
 
-
-      // g_T = vertcat(g_T, (-1)*(x(nh_ind).trans().mul(TW)).trans()-x(eh_ind).mul(DMatrix(T,1,1)));
-      // ub_g_T = vertcat(ub_g_T,DMatrix(T,1,0));
-      // lb_g_T =vertcat(lb_g_T, DMatrix(T,1,std::numeric_limits<double>::infinity()*(-1)));
+	}
+	  std::cout<<"ah: "<<std::endl<<ah<<std::endl<<std::endl;
+      //curr_f=curr_f->next;
+      g_T=vertcat(g_T,x(eh_ind).mul(DMatrix(T,1,-1)));
+      ub_g_T=vertcat(ub_g_T,TW.trans().mul(ah));
+      lb_g_T=vertcat(lb_g_T,DMatrix(T,1,std::numeric_limits<double>::infinity()*(-1)));
 
       //Soft constraints involving the slack variables
+      for (int i=0; i<Ih; i++)
+	{
+	  //Extract the i-th Wrench cone and store it in a DMatrix
+	  DMatrix Whi(Wh_i_list[h][i]->rows(),Wh_i_list[h][i]->cols());
+	  for (int r=0; r<Wh_i_list[h][i]->rows(); r++)
+	    for (int c=0;c<Wh_i_list[h][i]->cols() ; c++)
+	      Whi(r,c)=(*Wh_i_list[h][i])(r,c);
 
-    }
+	  g_s=vertcat(g_s,(x(lmbdh_i_ind[i]).trans().mul(Whi.trans()).mul(ah)).trans() +x(eh_ind)+x(deh_ind)+x(zh_i_ind[i]) );
+          ub_g_s=vertcat(ub_g_s, DMatrix(1,1,0));
+	  lb_g_s=vertcat(lb_g_s, DMatrix(1,1,std::numeric_limits<double>::infinity()*(-1)));
+
+	}
+    }		  
 
   g=vertcat(g_T,g_lmbde); g=vertcat(g,g_s);
   ub_g=vertcat(ub_g_T,ub_g_lmbde); ub_g=vertcat(ub_g,ub_g_s);
@@ -114,30 +147,58 @@ void computeInitialSolution(DMatrix& solution, const std::vector<std::vector<Eig
 
 
   // std::cout<<"f: "<<std::endl<<f<<std::endl;
-  std::cout<<"g: "<<std::endl<<g<<std::endl;
-  std::cout<<"ub_g: "<<std::endl<<ub_g<<std::endl;
-  std::cout<<"lb_g: "<<std::endl<<lb_g<<std::endl;
-   // std::cout<<"ub_x: "<<std::endl<<ub_x<<std::endl;
-   // std::cout<<"lb_x: "<<std::endl<<lb_x<<std::endl;
+  // std::cout<<"g: "<<std::endl<<g<<std::endl;
+  // std::cout<<"ub_g: "<<std::endl<<ub_g<<std::endl;
+  // std::cout<<"lb_g: "<<std::endl<<lb_g<<std::endl;
+  // std::cout<<"ub_x: "<<std::endl<<ub_x<<std::endl;
+  // std::cout<<"lb_x: "<<std::endl<<lb_x<<std::endl;
 
-  // SXFunction nlp(nlpIn("x",x),nlpOut("f",f,"g",g));
-  // nlp_solver=IpoptSolver(nlp);
-  // nlp_solver.setOption("print_level",0);
+   SXFunction lp(nlpIn("x",x),nlpOut("f",f,"g",g));
+  IpoptSolver lp_solver(lp);
+
+  lp_solver.setOption("print_level",0);
+
+   lp_solver.init();
+
+   lp_solver.setInput( x0, "x0");
+   lp_solver.setInput(lb_x, "lbx");
+   lp_solver.setInput(ub_x, "ubx");
+   lp_solver.setInput(lb_g, "lbg");
+   lp_solver.setInput(ub_g, "ubg");
+
+   lp_solver.evaluate();
+
+   // std::cout << std::setw(30) << "Objective: " << lp_solver.output("f").getDescription() << std::endl;
+   // std::cout << std::setw(30) << "Primal solution: " << lp_solver.output("x").getDescription() << std::endl;
 
 
-  // nlp_solver.init();
+     //Extract the initial vectors from the solution
+   initial_solution=DMatrix();
+   //curr_f=grasp_->getGWS()->conv_hull_.beginFacet().getFacetT();
+   DMatrix solution=lp_solver.output("x");
+   for (uint h=0; h<H; h++)
+     {
+    uint Ih=Wh_i_list[h].size();
+      uint nVh=2+Ih*(L+1);
+    
+   eh_ind=h*nVh;
+   std::vector<int> lmbdh_zh_ind(Ih*(L+1));
+   for (int j=0; j<lmbdh_zh_ind.size(); j++)
+     lmbdh_zh_ind[j]=h*nVh+2+j;
+  
+   //get the h-th normal
+      DMatrix ah(K,1);
+      for (int k=0; k<K;k++)
+	{
+	  //HAAAAAACKKK REPLACE WITH READING QHULL NORMALS FROM THE G>WS
+	  //        ah(k)=curr_f->normal[k]*(-1);
+	  ah(k)=hps[h][k];
+	}
 
-  // nlp_solver.setInput( x0, "x0");
-  // nlp_solver.setInput(lb_x, "lbx");
-  // nlp_solver.setInput(ub_x, "ubx");
-  // nlp_solver.setInput(lb_g, "lbg");
-  // nlp_solver.setInput(ub_g, "ubg");
-
-  // nlp_solver.evaluate();
-
-  // std::cout << std::setw(30) << "Objective: " << nlp_solver.output("f").getDescription() << std::endl;
-  // std::cout << std::setw(30) << "Primal solution: " << nlp_solver.output("x").getDescription() << std::endl;
-
+       initial_solution=vertcat(initial_solution, ah);
+       initial_solution=vertcat(initial_solution, solution(eh_ind));
+       initial_solution=vertcat(initial_solution, solution(lmbdh_zh_ind));
+     }
 }
 //-------------------------------------------------------------------------------------------------
 void createNLPSolver(const std::vector<Eigen::MatrixXd*>& Ph_list, const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list,IpoptSolver& nlp_solver)
@@ -162,8 +223,9 @@ void createNLPSolver(const std::vector<Eigen::MatrixXd*>& Ph_list, const std::ve
 
   SXMatrix x = ssym("x",nV); //decision variable vector
   SXMatrix f(1,1); //Objective
-  DMatrix x0;
+  DMatrix x0(nV,1,0);
   computeInitialSolution(x0,Wh_i_list);
+
   std::vector<int> nh_ind(K);
   double eh_ind;
   std::vector<std::vector<int> > lmbdh_i_ind;
@@ -274,8 +336,10 @@ void createNLPSolver(const std::vector<Eigen::MatrixXd*>& Ph_list, const std::ve
 
   nlp_solver.evaluate();
 
-  std::cout << std::setw(30) << "Objective: " << nlp_solver.output("f").getDescription() << std::endl;
-  std::cout << std::setw(30) << "Primal solution: " << nlp_solver.output("x").getDescription() << std::endl;
+  // std::cout << std::setw(30) << "Objective: " << nlp_solver.output("f").getDescription() << std::endl;
+  // std::cout << std::setw(30) << "Primal solution: " << nlp_solver.output("x").getDescription() << std::endl;
+
+
 
 }
 //-------------------------------------------------------------------------------------------------
@@ -331,6 +395,7 @@ void computeWarpedHyperplanes()
 //-------------------------------------------------------------------------------------------------
 int main()
 { 
+
   // ==============TWS===============================================
   Eigen::MatrixXd tmp(T,K);
   tmp<<0.5, 0.4, -0.1, 0.6, -0.4, -0.4, 0.1, -0.3;
