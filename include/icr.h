@@ -65,8 +65,7 @@
  *- Overload ICR::SearchZones::computeShiftedHyperplanes to accept a set of disturbance wrenches as argument and
  *  enable the function to formulate a ICR::DiscreteWrenchSpace describing a discrete Task Wrench Space.
  *
- * - Add clone methods to the main classes (ICR::TargetObject, ICR::Grasp, ICR::SearchZones, ICR::IndependentContact Regions)
- *   implementing deep copies
+ *- Consistently use shared pointers for all non-elemental class members and Add clone methods to all classes to allow for deep copies 
  */
 
 #include "utilities.h"

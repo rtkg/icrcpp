@@ -86,12 +86,27 @@ DMatrix D(2,2);
 
   // Create NLP solver
   IpoptSolver solver(nlp);
-  //StabilizedSQPMethod solver(nlp);
+  Dictionary nlp_solver_options;
+  nlp_solver_options["print_level"] = 0;
 
-  // Set options and initialize solver
-  //nlp_solver.setOption("max_iter",10);
-  //stabilized_qp_solver_options["qp_solver"] = SQICSolver::creator;
-  //nlp_solver.setOption("stabilized_qp_solver_options",stabilized_qp_solver_options);
+  // nlp_solver.setOption("stabilized_qp_solver",QPStabilizer::creator);
+  // Dictionary stabilized_qp_solver_options;
+  // stabilized_qp_solver_options["qp_solver"] = NLPQPSolver::creator;
+  // Dictionary qp_solver_options;
+  // qp_solver_options["nlp_solver"]= IpoptSolver::creator;
+  // Dictionary nlp_solver_options;
+  // nlp_solver_options["print_level"] = 0;
+  // nlp_solver_options["print_time"] = 0;
+  // nlp_solver_options["tol"] = 1e-16;
+  // nlp_solver_options["constr_viol_tol"] = 1e-16;
+  // nlp_solver_options["dual_inf_tol"] = 1e-16;
+  // nlp_solver_options["compl_inf_tol"] = 1e-16;
+  // qp_solver_options["nlp_solver_options"] = nlp_solver_options;
+  // stabilized_qp_solver_options["qp_solver_options"] = qp_solver_options;
+
+   nlp_solver.setOption("nlp_solver_options",nlp_solver_options);
+
+
   solver.init();
   
   // Solve NLP

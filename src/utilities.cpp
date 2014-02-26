@@ -40,6 +40,8 @@ void eigenMatrixToDoubleArray(Eigen::MatrixXd const & matrix, double* & array)
  void doubleArrayToEigenMatrix( double * const array, Eigen::MatrixXd & matrix)
  {
    assert(array != NULL);
+  assert((matrix.rows() > 0) && (matrix.cols() > 0));
+
    matrix=Eigen::Map<Eigen::MatrixXd>(array,matrix.rows(),matrix.cols());
 }
 //--------------------------------------------------------------------

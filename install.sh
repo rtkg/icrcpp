@@ -1,6 +1,7 @@
 #!/bin/bash 
 git submodule init 
 git submodule update 
+git checkout feature-casadi
 cd tools/obj-1.0/
 ./configure --prefix=`pwd`/build
 make 
