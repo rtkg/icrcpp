@@ -251,9 +251,9 @@ namespace ICR
       {
 #ifdef DEBUG_DISCRETEWRENCHSPACE //Write hyperplanes to file
 	if (dimension_==3)
-	fprintf(hp, "% f % f % f % f  \n",(curr_f->normal)[0],(curr_f->normal)[1],(curr_f->normal)[2],curr_f->offset);
+	  fprintf(hp, "% f % f % f % f  \n",(curr_f->normal)[0],(curr_f->normal)[1],(curr_f->normal)[2],curr_f->offset);
 	else if (dimension_==6)
-	fprintf(hp, "% f % f % f % f % f % f %f \n",(curr_f->normal)[0],(curr_f->normal)[1],(curr_f->normal)[2],(curr_f->normal)[3],(curr_f->normal)[4],(curr_f->normal)[5],curr_f->offset);
+	  fprintf(hp, "% f % f % f % f % f % f %f \n",(curr_f->normal)[0],(curr_f->normal)[1],(curr_f->normal)[2],(curr_f->normal)[3],(curr_f->normal)[4],(curr_f->normal)[5],curr_f->offset);
 	else
 	  std::cout<<"Error in DiscreteWrenchSpace::computeConvexHull() - cann only write 3- or 6D hyperplanes to file!"<<std::endl;
 #endif
@@ -280,6 +280,66 @@ namespace ICR
   SharedDoublePtr DiscreteWrenchSpace::getWrenches()const{return wrenches_;}
   //--------------------------------------------------------------------------
   void DiscreteWrenchSpace::setWrenches(SharedDoublePtr wrenches,uint num_wrenches)
+  {
+    assert(num_wrenches > 0);
+    assert(wrenches.get() != NULL);
+    wrenches_=wrenches;
+    num_wrenches_=num_wrenches;
+  }
+  //---------------------------------------------------------------------------------
+  DiscreteTaskWrenchSpace::DiscreteTaskWrenchSpace() : num_wrenches_(0)
+  {
+    type_=Discrete;
+  }
+  //---------------------------------------------------------------------------------
+  DiscreteTaskWrenchSpace::DiscreteTaskWrenchSpace(uint dimension) : WrenchSpace(dimension),num_wrenches_(0)
+  {
+    type_=Discrete;
+  }
+  //---------------------------------------------------------------------------------
+  DiscreteTaskWrenchSpace::DiscreteTaskWrenchSpace(uint dimension,SharedDoublePtr wrenches, uint num_wrenches) : WrenchSpace(dimension),num_wrenches_(0)
+  {
+    assert(num_wrenches > 0);
+    assert(wrenches.get() != NULL);
+    wrenches_=wrenches;
+    num_wrenches_=num_wrenches;
+    type_=Discrete;
+  }
+  //--------------------------------------------------------------------------
+  DiscreteTaskWrenchSpace::DiscreteTaskWrenchSpace(DiscreteTaskWrenchSpace const& src) : WrenchSpace(src),num_wrenches_(src.num_wrenches_),wrenches_(src.wrenches_){}
+  //--------------------------------------------------------------------------
+  DiscreteTaskWrenchSpace& DiscreteTaskWrenchSpace::operator=(DiscreteTaskWrenchSpace const& src)
+  {
+    if (this !=&src)
+      {
+	WrenchSpace::operator=(src); 
+	num_wrenches_=src.num_wrenches_;
+	wrenches_=src.wrenches_;
+      }
+    return *this;
+  }
+  //--------------------------------------------------------------------------
+  std::ostream& operator<<(std::ostream& stream, DiscreteTaskWrenchSpace const& d_wrench_space)
+  {
+    std::string wrench_space_type;
+    if (d_wrench_space.type_==Discrete) wrench_space_type="Discrete";
+    else wrench_space_type="Warning in DiscreteTaskWrenchSpace: Invalid rule type!";
+
+    stream <<'\n'<<"DISCRETE TASK WRENCH SPACE: "<<'\n'
+	   <<"Wrench space type: "<<wrench_space_type<<'\n'
+	   <<"Dimension: "<<d_wrench_space.dimension_<<'\n'
+	   <<"Number of input wrenches: "<<d_wrench_space.num_wrenches_<<'\n'<<'\n';
+
+    return stream;
+  }
+  //--------------------------------------------------------------------------
+  DiscreteTaskWrenchSpace::~DiscreteTaskWrenchSpace(){}
+  //--------------------------------------------------------------------------
+  uint DiscreteTaskWrenchSpace::getNumWrenches()const{return num_wrenches_;}
+  //--------------------------------------------------------------------------
+  SharedDoublePtr DiscreteTaskWrenchSpace::getWrenches()const{return wrenches_;}
+  //--------------------------------------------------------------------------
+  void DiscreteTaskWrenchSpace::setWrenches(SharedDoublePtr wrenches,uint num_wrenches)
   {
     assert(num_wrenches > 0);
     assert(wrenches.get() != NULL);

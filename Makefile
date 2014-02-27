@@ -7,8 +7,8 @@
 
 CC       = gcc
 CXX      = g++
-CFLAGS   = -pipe -Wall -W -O2 -fPIC 
-CXXFLAGS = -pipe -Werror -Wall -Wcast-qual -W  -Wextra -Wwrite-strings -Wno-sign-conversion -O3 -g -fPIC -msse2 -std=gnu++0x 
+CFLAGS   = -pipe -W -O2 -fPIC 
+CXXFLAGS = -pipe -Werror -Wcast-qual -W -Wwrite-strings -Wno-sign-conversion -O3 -g -fPIC -msse2 -std=gnu++0x 
 AR       = ar cqs 
 DEL_FILE = rm -f
 

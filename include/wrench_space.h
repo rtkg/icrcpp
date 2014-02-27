@@ -121,7 +121,35 @@ class DiscreteWrenchSpace : public WrenchSpace
 
  void setWrenches(SharedDoublePtr wrenches,uint num_wrenches);
 };
-//--------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+/*! 
+ *  \brief A discrete 6D-wrench space used to describe Task Wrench Spaces - w.r.t the
+ *  DiscreteWrenchSpace class, the orgQhull::Qhull member and corresponding methods are removed
+ *  since only one instance of Qhull can exist at any point due to the global variable f**kup. 
+ */
+class DiscreteTaskWrenchSpace : public WrenchSpace
+{
+
+ private:
+
+  uint num_wrenches_;
+  SharedDoublePtr wrenches_;
+
+ public:
+
+  DiscreteTaskWrenchSpace();
+  DiscreteTaskWrenchSpace(uint dimension);
+  DiscreteTaskWrenchSpace(uint dimension,SharedDoublePtr wrenches,uint num_wrenches);
+  DiscreteTaskWrenchSpace(DiscreteTaskWrenchSpace const& src);
+  DiscreteTaskWrenchSpace& operator=(DiscreteTaskWrenchSpace const& src);
+  virtual ~DiscreteTaskWrenchSpace();
+  friend std::ostream& operator<<(std::ostream& stream,DiscreteTaskWrenchSpace const& d_wrench_space);
+
+ uint getNumWrenches()const;
+ SharedDoublePtr getWrenches()const;
+
+ void setWrenches(SharedDoublePtr wrenches,uint num_wrenches);
+};
 //--------------------------------------------------------------------------
 }//namespace ICR
 #endif

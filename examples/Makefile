@@ -14,7 +14,7 @@ LIBS += -L /home/rkg/Software/casadi/build/lib  -lcasadi_ipopt_interface -lcasad
 LIBS += -L /usr/local/lib -ldl -lipopt -llapack -lcoinmumps -lblas -lcoinmetis -lcoinhsl
 
 
-FN=example
+FN=warp_test
 
 IDIR += -I ../tools/eigen-eigen-3.0.2            #include eigen headers
 IDIR += -I ../tools/Qhull-2011.2/src             #include qhull headers

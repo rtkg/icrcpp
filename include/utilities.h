@@ -37,6 +37,7 @@ class TargetObject;
 class WrenchSpace;
 class SphericalWrenchSpace;
 class DiscreteWrenchSpace;
+class DiscreteTaskWrenchSpace;
 class ObjectLoader;
 struct Node;
 struct PrimitiveSearchZone;
@@ -75,6 +76,7 @@ typedef std::tr1::shared_ptr<IndependentContactRegions>  IndependentContactRegio
 typedef std::tr1::shared_ptr<double>  SharedDoublePtr;
 typedef std::tr1::shared_ptr<WrenchSpace> WrenchSpacePtr;
 typedef std::tr1::shared_ptr<DiscreteWrenchSpace> DiscreteWrenchSpacePtr;
+typedef std::tr1::shared_ptr<DiscreteTaskWrenchSpace> DiscreteTaskWrenchSpacePtr;
 typedef std::tr1::shared_ptr<SphericalWrenchSpace> SphericalWrenchSpacePtr;
 //--------------------------------------------------------------------
 Eigen::Matrix3d skewSymmetricMatrix(Eigen::Vector3d vector);

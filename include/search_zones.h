@@ -5,6 +5,10 @@
 #include "utilities.h"
 #include <libqhullcpp/Qhull.h>
 
+#include <symbolic/casadi.hpp>
+#include <interfaces/ipopt/ipopt_solver.hpp>
+#include <symbolic/stl_vector_tools.hpp>
+
 namespace ICR
 {
 //-------------------------------------------------------------------
@@ -45,11 +49,16 @@ class SearchZones
   Eigen::Matrix<double,Eigen::Dynamic,6> hyperplane_normals_;
   Eigen::VectorXd hyperplane_offsets_;  
 
+  void computeConditionedHyperplanes(std::vector< ContactRegion * > const & conditioning_patches);
   void computeShiftedHyperplanes();
   void initializeSearchZones();
   void addShiftedPrimitiveSearchZone(uint finger_id,vertexT const* curr_vtx);
   void resetPrimitiveSearchZones(uint sz_id);    
   void clear();
+  void computePrimitiveSearchZones();
+  void extractPhList(std::vector<Eigen::MatrixXd*>& Ph_list);
+  void extractWhiList(std::vector< ContactRegion * > const & conditioning_patches,std::vector<std::vector<Eigen::MatrixXd*> >& Wh_i_list);
+  void createDiscreteTWSNLPSolver(const std::vector<Eigen::MatrixXd*>& Ph_list,const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list,CasADi::IpoptSolver& nlp_solver);
   SearchZones();
 
  public:
@@ -68,6 +77,7 @@ class SearchZones
  *  tangent to a Task Wrench Space 
  */
   void computeShiftedSearchZones();
+  void computeConditionedSearchZones(std::vector< ContactRegion * > const & conditioning_patches);
   const GraspPtr getGrasp()const;
   SearchZone const* getSearchZone(uint finger_id)const;
   uint getNumSearchZones()const;

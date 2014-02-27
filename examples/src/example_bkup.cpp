@@ -25,8 +25,12 @@ int main()
   GraspPtr prototype_grasp(new Grasp());
   prototype_grasp->init(f_parameters,obj_loader.getObject(),centerpoint_ids);
   SearchZonesPtr search_zones(new SearchZones(prototype_grasp));
-  double alpha=0.5;
-  search_zones->computeShiftedSearchZones(alpha);
+
+  //Create a new Task Wrench Space in form of a origin-centered sphere formed by a scaled Insphere of the prototype grasp's Grasp Wrench Space 
+  double alpha=0.5; //scaling factor
+  SphericalWrenchSpacePtr tws(new SphericalWrenchSpace(6, alpha*prototype_grasp->getGWS()->getOcInsphereRadius()));
+  search_zones->setTaskWrenchSpace(tws);
+  search_zones->computeShiftedSearchZones();
 
   //Create and plot the Independent Contact Regions
   IndependentContactRegions icr(search_zones,prototype_grasp);
@@ -49,7 +53,7 @@ int main()
 
   //Update prototype grasp, search zones and ICR
   prototype_grasp->init(f_parameters,obj_loader.getObject(),centerpoint_ids);
-  search_zones->computeShiftedSearchZones(alpha);
+  search_zones->computeShiftedSearchZones();
   icr.computeICR(Full); //Check all points on the target object for inclusion
   std::cout<<icr;
  
