@@ -37,7 +37,7 @@ class SearchZones
  private:
 
   GraspPtr grasp_;
-  WrenchSpace* tws_;
+  WrenchSpacePtr tws_;
   std::vector<SearchZone*> search_zones_;
   uint num_search_zones_;
   bool search_zones_computed_;
@@ -45,7 +45,7 @@ class SearchZones
   Eigen::Matrix<double,Eigen::Dynamic,6> hyperplane_normals_;
   Eigen::VectorXd hyperplane_offsets_;  
 
-  void computeShiftedHyperplanes(double alpha);
+  void computeShiftedHyperplanes();
   void initializeSearchZones();
   void addShiftedPrimitiveSearchZone(uint finger_id,vertexT const* curr_vtx);
   void resetPrimitiveSearchZones(uint sz_id);    
@@ -65,13 +65,14 @@ class SearchZones
 /*! 
  *  \brief Creates ICR::SearchZones by shifting the hyperplanes described in
  *  ICR::SearchZones#hyperplane_normals_ and ICR::SearchZones#hyperplane_offsets_ until their are
- *  tangent to a contnous Task Wrench Space described by alpha
+ *  tangent to a Task Wrench Space 
  */
-  void computeShiftedSearchZones(double alpha);
+  void computeShiftedSearchZones();
   const GraspPtr getGrasp()const;
   SearchZone const* getSearchZone(uint finger_id)const;
   uint getNumSearchZones()const;
   bool searchZonesComputed()const;
+  void setTaskWrenchSpace(WrenchSpacePtr tws);
 /*! 
  *  \brief Empties the vectors ICR::PrimitiveSearchZone::satisfied_wc_ids_ of all primitive search
  *  zones; This is necessary when transferring search zones which were utilized to compute ICR for
@@ -83,7 +84,7 @@ class SearchZones
   void resetSearchZones();
   Eigen::Matrix<double,Eigen::Dynamic,6> const* getHyperplaneNormals()const;
   Eigen::VectorXd const*getHyperplaneOffsets()const;
-  WrenchSpace const* getTWS()const;
+  WrenchSpacePtr getTaskWrenchSpace()const;
 };
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------

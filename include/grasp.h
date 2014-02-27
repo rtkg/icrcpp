@@ -24,7 +24,7 @@ class Grasp
   std::vector<Finger*> fingers_;
   bool initialized_;
   TargetObjectPtr obj_;  
-  DiscreteWrenchSpace* gws_;
+  DiscreteWrenchSpacePtr gws_;
   uint num_fingers_;
   uint num_grasp_wrenches_;
 
@@ -59,7 +59,7 @@ class Grasp
   Finger const* getFinger(uint id) const;
   uint getNumFingers()const;
   const TargetObjectPtr getParentObj()const;
-  DiscreteWrenchSpace const* getGWS()const;
+  const DiscreteWrenchSpacePtr getGWS()const;
 };
 //------------------------------------------------------------------
 //------------------------------------------------------------------

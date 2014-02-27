@@ -7,51 +7,67 @@ using namespace ICR;
 
 int main()
 { 
-  uint dim=2;
-  uint num_t_w=4;
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> tmp(num_t_w,dim);
-  tmp<<0, 0, 0, 2, 1, 1, 2, 0;
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> tw_e=tmp.transpose();
+  //Load a new target object 
+  ObjectLoader obj_loader;
+  obj_loader.loadObject("../models/beer_can.obj","beer_can");
+ 
+  //Create a list of 5 default finger parameters (default parameters defined in config.h) and a 
+  //vector of centerpoint contact id's for the 5-fingered prototype grasp
+  FParamList f_parameters;
+  FingerParameters parameters;
+  for (int i=0;i<5;i++)
+    f_parameters.push_back(parameters);
+  VectorXui centerpoint_ids(5);
+  centerpoint_ids << 1838, 4526, 4362, 1083, 793;
 
-  SharedDoublePtr tw_a;
-  double * a;
-  eigenMatrixToDoubleArray(tw_e,a);
+  //Create a prototype grasp and search zones, the parameter alpha is the scale of the largest
+  //origin-centered ball contained by the Grasp wrench space of the prototype grasp
+  GraspPtr prototype_grasp(new Grasp());
+  prototype_grasp->init(f_parameters,obj_loader.getObject(),centerpoint_ids);
+  SearchZonesPtr search_zones(new SearchZones(prototype_grasp));
 
-  std::cout<<"tw_e"<<std::endl<<tw_e<<std::endl;
+  //Create a new Task Wrench Space in form of a origin-centered sphere formed by a scaled Insphere of the prototype grasp's Grasp Wrench Space 
+  double alpha=0.5; //scaling factor
+  SphericalWrenchSpacePtr tws(new SphericalWrenchSpace(6, alpha*prototype_grasp->getGWS()->getOcInsphereRadius()));
+  search_zones->setTaskWrenchSpace(tws);
+  search_zones->computeShiftedSearchZones();
 
-  orgQhull::Qhull conv_hull_;
-   conv_hull_.runQhull("", dim,num_t_w,a ,"Qx Qt");
+  //Create and plot the Independent Contact Regions
+  IndependentContactRegions icr(search_zones,prototype_grasp);
+  icr.computeICR(BFS); //explore points for inclusion via a Breadth-First Search with the prototype grasp's centerpoints as root nodes
+  std::cout<<icr;
 
-   conv_hull_.defineVertexNeighborFacets();
-   double area_=conv_hull_.area();
-   double volume_=conv_hull_.volume();
-   int  num_vtx_=conv_hull_.vertexCount();
-   int  num_facets_=conv_hull_.facetCount();
+  // //=====================================================================
 
-   facetT* curr_f=conv_hull_.beginFacet().getFacetT();
-   double r_oc_insphere_=-(curr_f->offset);
+  //Load a new target object
+  obj_loader.loadObject("../models/cup.obj","cup");
 
+  //Modify the centerpoint id's and some of the finger parameters of the prototype-grasp.
+  //The third finger utilizies the Multi-Point contact model, patches only contain the center-point
+  //and border points
+  centerpoint_ids << 850, 305, 2009, 1740, 1701;     
+  f_parameters[0].setSoftFingerContact(1,6,0.5,0.5);
+  f_parameters[1].setFrictionlessContact(1);
+  f_parameters[2].setContactModelType(Multi_Point);
+  f_parameters[2].setInclusionRuleFilterPatch(true);
 
-   for(int i=0;i< num_facets_;i++)
-     {
-       curr_f->id=i; //Replaces the Qhull runtime indexing with indices 0 - num_facets_
-       r_oc_insphere_ = (-(curr_f->offset) < r_oc_insphere_) ? -(curr_f->offset) : r_oc_insphere_;
-       std::cout<<"normal: "<<-Eigen::Map<Eigen::Matrix<double,1,2> >(curr_f->normal)<<" offset: "<<-(curr_f->offset)  <<std::endl;
-   
-       curr_f=curr_f->next;
-     }
+  //Update prototype grasp, search zones and ICR
+  prototype_grasp->init(f_parameters,obj_loader.getObject(),centerpoint_ids);
+  search_zones->computeShiftedSearchZones();
+  icr.computeICR(Full); //Check all points on the target object for inclusion
+  std::cout<<icr;
+ 
   
-   std::cout<<"num_facets: "<<num_facets_<<std::endl;
-   std::cout<<"r_oc_insphere: "<<r_oc_insphere_<<std::endl;
-
-
-  // tw_a.reset(a);
-
-  // DiscreteWrenchSpace tws(dim,tw_a,num_t_w);
-  // tws.computeConvexHull(); 
-
-  // std::cout<<tws<<std::endl;
-
+  // Utility for timing selected parts of the code - uncomment below and put the code to be timed at the marked location
+  // struct timeval start, end;
+  // double c_time;
+  // gettimeofday(&start,0);
+  //
+  //  Put code to be timed here...
+  //  
+  // gettimeofday(&end,0);
+  // c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
+  // std::cout<<"Computation time: "<<c_time<<" s"<<std::endl;
 
   return 0;
 }

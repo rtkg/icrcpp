@@ -73,7 +73,9 @@ typedef std::tr1::shared_ptr<std::vector<Patch*> > PatchListPtr;
 typedef std::vector<std::tr1::shared_ptr<Finger> > FingerPtrList;
 typedef std::tr1::shared_ptr<IndependentContactRegions>  IndependentContactRegionsPtr;
 typedef std::tr1::shared_ptr<double>  SharedDoublePtr;
-
+typedef std::tr1::shared_ptr<WrenchSpace> WrenchSpacePtr;
+typedef std::tr1::shared_ptr<DiscreteWrenchSpace> DiscreteWrenchSpacePtr;
+typedef std::tr1::shared_ptr<SphericalWrenchSpace> SphericalWrenchSpacePtr;
 //--------------------------------------------------------------------
 Eigen::Matrix3d skewSymmetricMatrix(Eigen::Vector3d vector);
 //--------------------------------------------------------------------

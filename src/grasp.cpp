@@ -8,7 +8,7 @@ namespace ICR
 {
 //------------------------------------------------------------------
 //------------------------------------------------------------------
-Grasp::Grasp() : initialized_(false) , gws_(NULL),num_fingers_(0),num_grasp_wrenches_(0){}
+Grasp::Grasp() : initialized_(false) , num_fingers_(0),num_grasp_wrenches_(0){}
 //------------------------------------------------------------------
 Grasp::Grasp(Grasp const& src) :  fingers_(src.fingers_), initialized_(src.initialized_),
                                   obj_(src.obj_),gws_(src.gws_),num_fingers_(src.num_fingers_),num_grasp_wrenches_(src.num_grasp_wrenches_) {}
@@ -41,7 +41,6 @@ Grasp::~Grasp(){clear();}
 //------------------------------------------------------------------
 void Grasp::clear()
 {
- delete gws_;
   for(uint i=0; i < num_fingers_; i++)
     delete fingers_[i];
 
@@ -153,7 +152,7 @@ void Grasp::init(FParamList const& f_param_list,const TargetObjectPtr obj,Vector
   if(initialized_)//Clean up possible previous grasp
     clear();
 
-  gws_=new DiscreteWrenchSpace(6); //Hard coded for 6D wrench space right now - should be changed to allow for 3D wrenches associated to 2D grasps ...
+  gws_.reset(new DiscreteWrenchSpace(6)); //Hard coded for 6D wrench space right now - should be changed to allow for 3D wrenches associated to 2D grasps ...
 
   num_fingers_=f_param_list.size();
   for (uint i=0;i < num_fingers_;i++)
@@ -175,8 +174,7 @@ void Grasp::setCenterPointId(uint finger_id,uint centerpoint_id)
  num_grasp_wrenches_-=(fingers_.at(finger_id)->getCenterPointPatch()->patch_ids_.size())*(fingers_.at(finger_id)->getContactModel()->getLimitSurface()->getNumPrimitiveWrenches());
  fingers_.at(finger_id)->setCenterPointId(centerpoint_id);
  num_grasp_wrenches_+=(fingers_.at(finger_id)->getCenterPointPatch()->patch_ids_.size())*(fingers_.at(finger_id)->getContactModel()->getLimitSurface()->getNumPrimitiveWrenches());
- delete gws_; //old gws_ needs to be deleted, since DiscreteWrenchSpace::conv_hull_.runQhull() can only be executed once in the lifetime of conv_hull_
- gws_ = new DiscreteWrenchSpace(6);
+ gws_.reset(new DiscreteWrenchSpace(6)); //old gws_ needs to be deleted, since DiscreteWrenchSpace::conv_hull_.runQhull() can only be executed once in the lifetime of conv_hull_
  computeGWS();
 }
 //------------------------------------------------------------------
@@ -193,8 +191,8 @@ void Grasp::setCenterPointIds(VectorXui const& centerpoint_ids)
       fingers_.at(finger_id)->setCenterPointId(centerpoint_ids(finger_id));
       num_grasp_wrenches_+=(fingers_.at(finger_id)->getCenterPointPatch()->patch_ids_.size())*(fingers_.at(finger_id)->getContactModel()->getLimitSurface()->getNumPrimitiveWrenches());
     }
- delete gws_; //old gws_ needs to be deleted, since DiscreteWrenchSpace::conv_hull_.runQhull() can only be executed once
- gws_ = new DiscreteWrenchSpace(6);
+
+ gws_.reset( new DiscreteWrenchSpace(6));  //old gws_ needs to be deleted, since DiscreteWrenchSpace::conv_hull_.runQhull() can only be executed once
   computeGWS();
 }
 //------------------------------------------------------------------
@@ -202,7 +200,7 @@ bool Grasp::isInitialized()const{return initialized_;}
 //------------------------------------------------------------------
 const TargetObjectPtr Grasp::getParentObj()const{return obj_;}
 //------------------------------------------------------------------
-DiscreteWrenchSpace const* Grasp::getGWS()const{return gws_;}
+const DiscreteWrenchSpacePtr Grasp::getGWS()const{return gws_;}
 //------------------------------------------------------------------
 //------------------------------------------------------------------
 }//namespace ICR
