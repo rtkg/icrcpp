@@ -10,8 +10,8 @@ CFLAGS = -O3 -g -fPIC -std=gnu++0x
 LIBS  = -L ../lib -licr                                   #include libicr library
 LIBS += -L ../tools/obj-1.0/build/lib -lobj               #include libobj library
 LIBS += -L ../tools/Qhull-2011.2/lib -lqhullcpp -lqhull6  #include qhull libs LINK ORDER MATTERS!!!
-LIBS += -L /home/rkg/Software/casadi/install/lib  -lcasadi_ipopt_interface -lcasadi    
-LIBS += -L /usr/local/lib -ldl -lipopt -llapack -lcoinmumps -lblas -lcoinmetis 
+LIBS += -L /home/rkg/Software/casadi/build/lib  -lcasadi_ipopt_interface -lcasadi    
+LIBS += -L /usr/local/lib -ldl -lipopt -llapack -lcoinmumps -lblas -lcoinmetis -lcoinhsl
 
 
 FN=nlp_test
