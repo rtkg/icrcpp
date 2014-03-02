@@ -66,6 +66,12 @@
  *  enable the function to formulate a ICR::DiscreteWrenchSpace describing a discrete Task Wrench Space.
  *
  *- Consistently use shared pointers for all non-elemental class members and Add clone methods to all classes to allow for deep copies 
+ *
+ *- Make a central (global) Qhull server and remove Qhull as class member from the
+ *   DiscreteWrenchSpace class since Qhull allows only one instance to be alive at a time (this would
+ *   also allow to remove the DiscreteTaskWrenchSpace class which only exists for this reason)
+ *
+ *- Remove the wrench-space 6D-assumption which is hardcoded in places
  */
 
 #include "utilities.h"

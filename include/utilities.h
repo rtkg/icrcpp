@@ -95,5 +95,6 @@ uint dfactorial(uint x);
  */
  void doubleArrayToEigenMatrix( double * const array, Eigen::MatrixXd & matrix);
 //--------------------------------------------------------------------
+
 }//namespace ICR
 #endif

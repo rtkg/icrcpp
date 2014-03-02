@@ -62,6 +62,7 @@ class Grasp
   const DiscreteWrenchSpacePtr getGWS()const;
 };
 //------------------------------------------------------------------
+ VectorXui generateRandomGrasp(TargetObjectPtr object,const FParamList f_parameters);
 //------------------------------------------------------------------
 }//namespace ICR
 #endif

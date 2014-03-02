@@ -195,12 +195,33 @@ void Grasp::setCenterPointIds(VectorXui const& centerpoint_ids)
  gws_.reset( new DiscreteWrenchSpace(6));  //old gws_ needs to be deleted, since DiscreteWrenchSpace::conv_hull_.runQhull() can only be executed once
   computeGWS();
 }
-//------------------------------------------------------------------
-bool Grasp::isInitialized()const{return initialized_;}
-//------------------------------------------------------------------
-const TargetObjectPtr Grasp::getParentObj()const{return obj_;}
-//------------------------------------------------------------------
-const DiscreteWrenchSpacePtr Grasp::getGWS()const{return gws_;}
-//------------------------------------------------------------------
-//------------------------------------------------------------------
+  //------------------------------------------------------------------
+  bool Grasp::isInitialized()const{return initialized_;}
+  //------------------------------------------------------------------
+  const TargetObjectPtr Grasp::getParentObj()const{return obj_;}
+  //------------------------------------------------------------------
+  const DiscreteWrenchSpacePtr Grasp::getGWS()const{return gws_;}
+  //------------------------------------------------------------------
+  VectorXui generateRandomGrasp(TargetObjectPtr object,const FParamList f_parameters)
+  {
+    assert(object->getNumCp() >= f_parameters.size());
+srand(time(NULL));
+    uint n_fingers=f_parameters.size();
+    VectorXui centerpoint_ids(n_fingers);
+    while(1)
+      {
+	for(uint i=0; i<n_fingers;i++)
+	  centerpoint_ids(i)=(rand() % (object->getNumCp()));
+
+	Grasp grasp;
+	grasp.init(f_parameters,object,centerpoint_ids);
+	if(grasp.getGWS()->containsOrigin())
+	  break;
+
+      }
+
+    return centerpoint_ids;
+  }
+  //------------------------------------------------------------------
+
 }//namespace ICR
