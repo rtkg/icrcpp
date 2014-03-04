@@ -152,7 +152,6 @@ std::ostream& operator<<(std::ostream& stream, LimitSurface const& lim_surf)
     if (lim_surf.contact_type_==Frictionless) contact_type="Frictionless";
   else if (lim_surf.contact_type_==Frictional)   contact_type="Frictional";
   else if (lim_surf.contact_type_==Soft_Finger)  contact_type="Soft Finger";
-  else if (lim_surf.contact_type_==Undefined_CT)  contact_type="Undefined";
   else contact_type="Warning in LimitSurface: Invalid contact type!";
 
   stream <<'\n'<<"LIMIT SURFACE: "<<'\n'

@@ -9,6 +9,11 @@
 #include "../include/config.h"
 #include "assert.h"
 #include <thread>
+#include <qpOASES.hpp>
+#include <gurobi_c++.h>
+#include <iomanip>
+#include <sys/time.h>
+#include <time.h>
 
 namespace ICR
 {
@@ -84,6 +89,84 @@ namespace ICR
     icr_computed_ = false;
   }
   //--------------------------------------------------------------------
+  bool IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
+  {
+    // struct timeval start, end;
+    // double c_time;
+
+    if ((prim_sz->satisfied_wc_ids_.array() == wc->id_).any())
+      return true;
+
+    uint L=wc->num_primitive_wrenches_;
+    uint S=prim_sz->hyperplane_ids_.size();
+
+    GRBEnv env = GRBEnv();
+    env.set(GRB_IntParam_OutputFlag,0);
+    env.set(GRB_IntParam_Presolve,0);
+    //    env.set(GRB_IntParam_Method,0);
+
+    double* lb_x = new double[L]; std::fill_n(lb_x, L, 0); 
+    double* ones_L = new double[L]; std::fill_n(ones_L, L, 1); 
+    double* proj=new double[L];
+    char constrs_senses[1];
+    double one[1]; one[0]=1;
+
+    //Variables
+    GRBModel lp = GRBModel(env);
+    GRBVar* vars =lp.addVars(lb_x,NULL,NULL,NULL,NULL,L);
+    lp.update();
+
+    //Equality constraints
+    GRBLinExpr one_times_x[1]; one_times_x[0].addTerms(ones_L,vars,L);
+    constrs_senses[0]=GRB_EQUAL;
+    GRBConstr* eq_constrs = lp.addConstrs(one_times_x,constrs_senses,one,NULL,1);
+    lp.update();
+
+    Eigen::MatrixXd W=wc->cone_;
+    for (uint s=0;s<S; s++)
+      {
+	//gettimeofday(&start,0);
+
+	//Inequality constraints
+	Eigen::VectorXd proj_e=search_zones_->hyperplane_normals_.row(prim_sz->hyperplane_ids_[s])*W;
+	double neg_offset[1]; neg_offset[0]=-search_zones_->hyperplane_offsets_(prim_sz->hyperplane_ids_[s]);
+	
+	eigenMatrixToDoubleArray(proj_e,proj);
+	GRBLinExpr proj_times_x[1]; proj_times_x[0].addTerms(proj,vars,L);
+	constrs_senses[0]=GRB_LESS_EQUAL;
+	GRBConstr* ineq_constrs = lp.addConstrs(proj_times_x,constrs_senses,neg_offset,NULL,1);
+	lp.update();
+
+	lp.optimize();
+	int status = lp.get(GRB_IntAttr_Status);
+
+	if (status != GRB_OPTIMAL) 
+	  {
+	    delete ineq_constrs;
+	    return false;
+	  }
+
+	//remove ineq constraint 
+	lp.remove(*ineq_constrs);
+        lp.update();
+	delete ineq_constrs;
+
+	// gettimeofday(&end,0);
+	// c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
+	// std::cout<<"Computation time: "<<c_time<<" s"<<std::endl;
+      }
+    delete proj;
+    delete lb_x;
+    delete ones_L;
+    delete vars;
+    delete eq_constrs;
+
+    prim_sz->satisfied_wc_ids_.conservativeResize(prim_sz->satisfied_wc_ids_.size()+1);
+    prim_sz->satisfied_wc_ids_(prim_sz->satisfied_wc_ids_.size()-1)=wc->id_;
+
+    return true;
+  }
+  //--------------------------------------------------------------------
   bool IndependentContactRegions::primitiveSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
   {
     if ((prim_sz->satisfied_wc_ids_.array() == wc->id_).any())
@@ -112,7 +195,7 @@ namespace ICR
     return false;
   }
   //--------------------------------------------------------------------
-  bool IndependentContactRegions::searchZoneInclusionTest(uint region_id,Patch const* patch)const
+  bool IndependentContactRegions::searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type)const
   {
 
     bool psz_satisfied;
@@ -123,11 +206,26 @@ namespace ICR
 	psz_satisfied=false;
 	for(ConstIndexListIterator patch_point=patch->patch_ids_.begin(); patch_point != patch->patch_ids_.end(); patch_point++)
 	  {
-	    if(primitiveSearchZoneInclusionTest((*search_zones_->search_zones_[region_id])[psz_id] ,grasp_->getFinger(region_id)->getOWS()->getWrenchCone(*patch_point)))
+	    struct timeval start, end;
+	    double c_time;
+	    // gettimeofday(&start,0);
+
+	    if(wrench_inclusion_test_type==Primitive)
+              psz_satisfied=primitiveSearchZoneInclusionTest((*search_zones_->search_zones_[region_id])[psz_id] ,grasp_->getFinger(region_id)->getOWS()->getWrenchCone(*patch_point));
+            else if(wrench_inclusion_test_type==Convex_Combination)
+	      psz_satisfied=convexCombinationSearchZoneInclusionTest((*search_zones_->search_zones_[region_id])[psz_id] ,grasp_->getFinger(region_id)->getOWS()->getWrenchCone(*patch_point));
+            else 
 	      {
-		psz_satisfied=true;
-		break;
+		std::cout<<"Error in IndependentContactRegions::searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type) - invalid wrench inclusion test type specified! Exiting ..."<<std::endl;
+		exit(0);
 	      }
+
+	    // gettimeofday(&end,0);
+	    // c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
+	    // std::cout<<"Computation time: "<<c_time<<" s"<<std::endl;
+
+	    if (psz_satisfied)
+	      break;
 	  }
 	if(!psz_satisfied)
 	  return false;
@@ -135,7 +233,7 @@ namespace ICR
     return true;
   }
   //--------------------------------------------------------------------
-  void IndependentContactRegions::computeContactRegionBFS(uint region_id)
+  void IndependentContactRegions::computeContactRegionBFS(uint region_id, const WrenchInclusionTestType wrench_inclusion_test_type)
   {
     search_zones_->resetPrimitiveSearchZones(region_id); //Make sure the member ICR::PrimitiveSearchZone::satisfied_wc_ids_ is empty
     std::list<Node> nodes; //List of nodes for the breadth-first-search on the target object's vertices
@@ -146,14 +244,14 @@ namespace ICR
     nodes.push_back(Node(const_cast<ContactPoint*>(grasp_->getParentObj()->getContactPoint(init_centerpoint_id)))); //push the node corresponding to the centerpoint of the patch associated with the initial prototype grasp contact
     contact_regions_[region_id]->push_back(const_cast<Patch*>(grasp_->getFinger(region_id)->getCenterPointPatch())); 
     explored_cp(init_centerpoint_id)=EXPLORED_QUALIFIED;
- 
+
     while(nodes.size() > 0)
       {   
 	for(ConstIndexListIterator neighbor=nodes.front().contact_point_->getNeighborItBegin(); neighbor != nodes.front().contact_point_->getNeighborItEnd(); neighbor++)      
 	  {
 	    if(explored_cp(*neighbor)==NOT_EXPLORED)
 	      {	     
-		if(searchZoneInclusionTest(region_id,grasp_->getFinger(region_id)->getPatch(*neighbor)))
+		if(searchZoneInclusionTest(region_id,grasp_->getFinger(region_id)->getPatch(*neighbor),wrench_inclusion_test_type))
 		  {
 		    nodes.push_back(Node(const_cast<ContactPoint*>(grasp_->getParentObj()->getContactPoint(*neighbor))));
 		    contact_regions_[region_id]->push_back(const_cast<Patch*>(grasp_->getFinger(region_id)->getPatch(*neighbor))); 
@@ -177,7 +275,9 @@ namespace ICR
 
     num_contact_regions_=search_zones_->num_search_zones_;
     contact_regions_.reserve(num_contact_regions_);
- 
+
+  
+
 #ifdef MULTITHREAD_ICR_COMPUTATION
     std::vector<std::thread*> threads;
     threads.reserve(num_contact_regions_);
@@ -185,9 +285,9 @@ namespace ICR
       {
 	contact_regions_.push_back(new ContactRegion);
 	if (type==BFS)
-	  threads.push_back(new std::thread(&IndependentContactRegions::computeContactRegionBFS,this,region_id));
+	  threads.push_back(new std::thread(&IndependentContactRegions::computeContactRegionBFS,this,region_id,grasp_->getFinger(region_id)->getWrenchInclusionTestType()));
 	else if (type==Full)
-	  threads.push_back(new std::thread(&IndependentContactRegions::computeContactRegionFull,this,region_id));
+	  threads.push_back(new std::thread(&IndependentContactRegions::computeContactRegionFull,this,region_id,grasp_->getFinger(region_id)->getWrenchInclusionTestType()));
 	else
 	  std::cout<<"Error: Unknown ICR type - cannot compute ICR!"<<std::endl;
       
@@ -202,9 +302,9 @@ namespace ICR
       {
 	contact_regions_.push_back(new ContactRegion);
 	if (type==BFS)
-	  computeContactRegionBFS(region_id);
+	  computeContactRegionBFS(region_id,grasp_->getFinger(region_id)->getWrenchInclusionTestType());
 	else if (type==Full)
-	  computeContactRegionFull(region_id);
+	  computeContactRegionFull(region_id,grasp_->getFinger(region_id)->getWrenchInclusionTestType());
         else
 	  std::cout<<"Error: Unknown ICR type - cannot compute ICR!"<<std::endl;
       }
@@ -238,7 +338,18 @@ namespace ICR
     return (grasp_ != NULL && grasp_->isInitialized());
   }
   //--------------------------------------------------------------------
-  void IndependentContactRegions::computeContactRegionFull(uint region_id)
+  uint IndependentContactRegions::getNumICRPoints()const
+  {
+    assert(icr_computed_);
+    uint n_P=0;
+    for (uint n=0; n<num_contact_regions_;n++)
+      for (uint p=0; p<contact_regions_[n]->size(); p++)
+	n_P++;
+
+    return n_P;
+  }
+  //--------------------------------------------------------------------
+  void IndependentContactRegions::computeContactRegionFull(uint region_id, const WrenchInclusionTestType wrench_inclusion_test_type)
   {
     search_zones_->resetPrimitiveSearchZones(region_id); //Make sure the member ICR::PrimitiveSearchZone::satisfied_wc_ids_ is empty
     VectorXui explored_cp=VectorXui::Zero(grasp_->getParentObj()->getNumCp(),1); //set all entries to NOT_EXPLORED
@@ -247,7 +358,7 @@ namespace ICR
     PatchListPtr patches=grasp_->getFinger(region_id)->getPatches();
 
     for (unsigned int i=0; i<patches->size(); i++)
-      if(searchZoneInclusionTest(region_id,(*patches)[i]))
+      if(searchZoneInclusionTest(region_id,(*patches)[i],wrench_inclusion_test_type))
 	{
 	  contact_regions_[region_id]->push_back(const_cast<Patch*>((*patches)[i]));
           explored_cp((*patches)[i]->patch_ids_.front())=EXPLORED_QUALIFIED; //first point in the patch_id_ list is the centerpoint (hopefully ...)

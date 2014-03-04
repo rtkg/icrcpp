@@ -62,16 +62,33 @@
  *   confusion with ICR::IndependentContactRegions::searchZoneInclusionTest and
  *   ICR::IndependentContactRegions::primitiveSearchZoneInclusionTest.
  *
- *- Overload ICR::SearchZones::computeShiftedHyperplanes to accept a set of disturbance wrenches as argument and
- *  enable the function to formulate a ICR::DiscreteWrenchSpace describing a discrete Task Wrench Space.
- *
- *- Consistently use shared pointers for all non-elemental class members and Add clone methods to all classes to allow for deep copies 
+ *- Consistently use shared pointers for all non-elemental class members and Add clone methods to
+ *   all classes to allow for deep copies
  *
  *- Make a central (global) Qhull server and remove Qhull as class member from the
  *   DiscreteWrenchSpace class since Qhull allows only one instance to be alive at a time (this would
  *   also allow to remove the DiscreteTaskWrenchSpace class which only exists for this reason)
  *
  *- Remove the wrench-space 6D-assumption which is hardcoded in places
+ *
+ *- Assert that a discrete TWS contains the origin in SearchZones::computeShiftedHyperplanes() 
+ *
+ *- Implement proper error handling opposed to the simple screen prints used right now
+ *
+ *- Remove the self-defined Eigen2Array and Array2Eigen functions defined in utilities.h/cpp and
+ *  replace them with Eigen::Map
+ *
+ *- Add the option for a LP-based Inclusion Test in
+ *    IndependentContactRegions::SearchZoneInclusionTest(...) use a switch in ICR::Finger to check
+ *    which option to choose from and implement a new method
+ *    IndependentContactRegions::primitiveSearchZoneInclusionTestLP(...) which evaluates the LP
+ *
+ *- Need to run qhull with the Qx option, which results in coplanar facets, otherwise there are
+ *    undefined facets - should find some workaround for this to reduce the unnecessary large number
+ *    of hyperplanes
+ *
+ *- Try a version of the LP-based inclusion test as one 'big' LP for all hyperplanes in a primivive search zone
+ *
  */
 
 #include "utilities.h"

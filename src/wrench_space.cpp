@@ -9,10 +9,10 @@ namespace ICR
 {
   //---------------------------------------------------------------------------------
   //---------------------------------------------------------------------------------
-  WrenchSpace::WrenchSpace() : type_(Undefined_WS),full_dim_(false),contains_origin_(false),
+  WrenchSpace::WrenchSpace() : type_(Discrete),full_dim_(false),contains_origin_(false),
 			       r_oc_insphere_(0),volume_(0),area_(0),dimension_(6){}
   //--------------------------------------------------------------------------
-  WrenchSpace::WrenchSpace(uint dimension) : type_(Undefined_WS),full_dim_(false),contains_origin_(false),
+  WrenchSpace::WrenchSpace(uint dimension) : type_(Discrete),full_dim_(false),contains_origin_(false),
 					     r_oc_insphere_(0),volume_(0),area_(0),dimension_(dimension)
   {
     assert(dimension_ > 0);
@@ -216,9 +216,8 @@ namespace ICR
     assert(wrenches_.get() != NULL);
     assert(num_wrenches_ > dimension_);
 
-
     try{
-      conv_hull_.runQhull("", dimension_,num_wrenches_,wrenches_.get() ,"Qx Qt");
+      conv_hull_.runQhull("", dimension_,num_wrenches_,wrenches_.get() ,"Qx Qt"); //Qx doesn't merge coplanar facets, Q0 does, QJ joggles
     }
     catch(std::exception& exc)
       {
@@ -236,7 +235,9 @@ namespace ICR
     volume_=conv_hull_.volume();
     num_vtx_=conv_hull_.vertexCount();
     num_facets_=conv_hull_.facetCount();
- 
+
+
+
     facetT* curr_f=conv_hull_.beginFacet().getFacetT();
     r_oc_insphere_=-(curr_f->offset);
 
@@ -246,9 +247,10 @@ namespace ICR
     if(!hp)
       std::cout<<"Warning in DiscreteWrenchSpace: Couldn't write to file."<<std::endl;
 #endif
-
+  
     for(uint i=0;i< num_facets_;i++)
       {
+
 #ifdef DEBUG_DISCRETEWRENCHSPACE //Write hyperplanes to file
 	if (dimension_==3)
 	  fprintf(hp, "% f % f % f % f  \n",(curr_f->normal)[0],(curr_f->normal)[1],(curr_f->normal)[2],curr_f->offset);
@@ -261,7 +263,7 @@ namespace ICR
 	r_oc_insphere_ = (-(curr_f->offset) < r_oc_insphere_) ? -(curr_f->offset) : r_oc_insphere_;
 	curr_f=curr_f->next;
       }
-  
+
     contains_origin_=(r_oc_insphere_ > EPSILON_FORCE_CLOSURE) ? true : false;
     full_dim_=true;
     ch_computed_=true;

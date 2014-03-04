@@ -36,6 +36,48 @@ FX generateCodeAndCompile(FX fcn, const std::string& name){
   ExternalFunction fcn_e("./" + name + ".so");
   return fcn_e;
 }
+//---------------------------------------------------------------------
+void setTWSNLPHyperplanes(const CasADi::IpoptSolver& nlp_solver,const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list)
+{
+  uint H=Wh_i_list.size();
+ uint L=Wh_i_list[0][0]->cols(); //dimension
+  uint K=Wh_i_list[0][0]->rows(); //dimension
+  DMatrix solution=nlp_solver.output("x");
+
+    //EXTRACT DATA HERE
+    // uint num_hyperplanes=grasp_->getGWS()->num_facets_;
+    //    hyperplane_normals_.resize(num_hyperplanes,6);
+    //    hyperplane_offsets_.resize(num_hyperplanes);
+    //    facetT* curr_f=grasp_->getGWS()->conv_hull_.beginFacet().getFacetT();
+  //	hyperplane_offsets_.fill(offset); 
+    // for(uint hp_id=0; hp_id < num_hyperplanes;hp_id++)
+    //   {
+    //     assert(offset <= (-curr_f->offset)); //Make sure that GWSinit contains the TWS and the hyperplanes are shifted inwards
+    //     //The direction of the normal is switched to inward-pointing in order to be consistent with the positive offset
+    //     hyperplane_normals_.row(hp_id)=(-Eigen::Map<Eigen::Matrix<double,1,6> >(curr_f->normal));
+    //     curr_f=curr_f->next;
+    //   }
+  Eigen::RowVectorXd normal(1,K);
+  uint h_start_x_ind=0;
+  for (uint h=0; h<H;h++)
+    {
+      uint Ih=Wh_i_list[h].size();
+       uint nVh=K+1+Ih*(L+1);
+
+       for(uint j=0; j<K; j++)
+	 normal(j)=solution(h_start_x_ind+j).toScalar();
+
+       double de=1/normal.norm();
+       normal=normal*de;
+
+       double offset=solution(h_start_x_ind+K).toScalar()*de;
+
+       std::cout<<"normal: "<<normal<<std::endl<<"offset: "<<offset<<std::endl;
+
+       h_start_x_ind+=nVh;
+    }
+
+}
 
 //===========GLOBAL===========================
 uint K=2;
@@ -245,8 +287,8 @@ DiscreteWrenchSpace* tws_;
 
   lp_solver.evaluate();
 
-  std::cout << std::setw(30) << "Initial Objective: " << lp_solver.output("f").getDescription() << std::endl;
-  std::cout << std::setw(30) << "Initial Primal solution: " << lp_solver.output("x").getDescription() << std::endl;
+  // std::cout << std::setw(30) << "Initial Objective: " << lp_solver.output("f").getDescription() << std::endl;
+  // std::cout << std::setw(30) << "Initial Primal solution: " << lp_solver.output("x").getDescription() << std::endl;
 
 
   //Extract the initial vectors from the solution
@@ -283,8 +325,8 @@ DiscreteWrenchSpace* tws_;
       }
     else
       {
-	initial_solution=CasADi::vertcat(initial_solution, ah*(1e5)); 
-      initial_solution=CasADi::vertcat(initial_solution, solution(eh_ind)*1e5); 
+	initial_solution=CasADi::vertcat(initial_solution, ah*(0)); 
+      initial_solution=CasADi::vertcat(initial_solution, solution(eh_ind)*0); 
      }
       initial_solution=CasADi::vertcat(initial_solution, solution(lmbdh_zh_ind));
 
@@ -480,45 +522,15 @@ void createNLPSolver(const std::vector<Eigen::MatrixXd*>& Ph_list, const std::ve
   // std::cout<<"ub_x: "<<std::endl<<ub_x<<std::endl;
   // std::cout<<"lb_x: "<<std::endl<<lb_x<<std::endl;
 
-  // Convert MXFunction to SXFunction before code generation (may or may not improve efficiency)
-  bool expand = true;
-
-
- // NLP function
-  FX nlp = SXFunction(nlpIn("x",x),nlpOut("f",f,"g",g));
-  nlp.init();
+  
 
 
 
+  //OOOOLDDDD
 
-//  // NLP function
-// SXFunction nlp(nlpIn("x",x),nlpOut("f",f,"g",g));
-//   nlp.init();
-
-  // Gradient of the objective
-  FX grad_f = nlp.gradient("x","f");
-  grad_f.init();
-
-  // Jacobian of the constraints
-  FX jac_g = nlp.jacobian("x","g");
-  jac_g.init();
-
-  // Hessian of the lagrangian
-  FX grad_lag = nlp.derivative(0,1);
-  FX hess_lag = grad_lag.jacobian(NL_X,NL_NUM_OUT+NL_X,false,true);
-  hess_lag.init();
-
-  // Codegen and compile
-  nlp = generateCodeAndCompile(nlp,"nlp");
-  grad_f = generateCodeAndCompile(grad_f,"grad_f");
-  jac_g = generateCodeAndCompile(jac_g,"jac_g");
-  hess_lag = generateCodeAndCompile(hess_lag,"hess_lag");
-
-  // Create an NLP solver passing derivative information
-nlp_solver=IpoptSolver(nlp);
-  nlp_solver.setOption("grad_f",grad_f);
-  nlp_solver.setOption("jac_g",jac_g);
-  nlp_solver.setOption("hess_lag",hess_lag);
+  SXFunction nlp(nlpIn("x",x),nlpOut("f",f,"g",g));
+  nlp_solver=IpoptSolver(nlp);
+   nlp_solver.setOption("print_level",0);
   nlp_solver.init();
 
   nlp_solver.setInput( x0, "x0");
@@ -526,29 +538,13 @@ nlp_solver=IpoptSolver(nlp);
   nlp_solver.setInput(ub_x, "ubx");
   nlp_solver.setInput(lb_g, "lbg");
   nlp_solver.setInput(ub_g, "ubg");
-  // nlp_solver.setOption("print_level",0);
-
-
 
   nlp_solver.evaluate();
 
-  //OOOOLDDDD
+   std::cout << std::setw(30) << "Objective: " << nlp_solver.output("f").getDescription() << std::endl;
+  std::cout << std::setw(30) << "Primal solution: " << nlp_solver.output("x").getDescription() << std::endl; 
 
-  // SXFunction nlp(nlpIn("x",x),nlpOut("f",f,"g",g));
-  // nlp_solver=IpoptSolver(nlp);
-  //  nlp_solver.setOption("print_level",0);
-  // nlp_solver.init();
-
-  // nlp_solver.setInput( x0, "x0");
-  // nlp_solver.setInput(lb_x, "lbx");
-  // nlp_solver.setInput(ub_x, "ubx");
-  // nlp_solver.setInput(lb_g, "lbg");
-  // nlp_solver.setInput(ub_g, "ubg");
-
-  // nlp_solver.evaluate();
-
-  //  std::cout << std::setw(30) << "Objective: " << nlp_solver.output("f").getDescription() << std::endl;
-  // std::cout << std::setw(30) << "Primal solution: " << nlp_solver.output("x").getDescription() << std::endl; 
+  setTWSNLPHyperplanes(nlp_solver,Wh_i_list);
 }
 //-------------------------------------------------------------------------------------------------
 void computeWarpedHyperplanes()
@@ -557,36 +553,36 @@ void computeWarpedHyperplanes()
   Eigen::MatrixXd mat(2,2);
   mat(0,0)=0.7; mat(1,0)=2; mat(0,1)=-0.5; mat(1,1)=1;
   Ph_list.push_back(new Eigen::MatrixXd(mat));
-  // mat(0,0)=0.7; mat(1,0)=2; mat(0,1)=1; mat(1,1)=-1;
-  // Ph_list.push_back(new Eigen::MatrixXd(mat));
-  // mat(0,0)=1; mat(1,0)=-1; mat(0,1)=-0.8; mat(1,1)=-0.6; 
-  // Ph_list.push_back(new Eigen::MatrixXd(mat));
-  // mat(0,0)=-0.8; mat(1,0)=-0.6; mat(0,1)=-0.5; mat(1,1)=1;
-  // Ph_list.push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=0.7; mat(1,0)=2; mat(0,1)=1; mat(1,1)=-1;
+  Ph_list.push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=1; mat(1,0)=-1; mat(0,1)=-0.8; mat(1,1)=-0.6; 
+  Ph_list.push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=-0.8; mat(1,0)=-0.6; mat(0,1)=-0.5; mat(1,1)=1;
+  Ph_list.push_back(new Eigen::MatrixXd(mat));
 
 
   std::vector<std::vector<Eigen::MatrixXd* > > Wh_i_list(Ph_list.size());
   mat(0,0)=-0.6; mat(1,0)=0.6; mat(0,1)=-0.2; mat(1,1)=1;
   Wh_i_list[0].push_back(new Eigen::MatrixXd(mat));
-  // mat(0,0)=0.2; mat(1,0)=1.8; mat(0,1)=0.8; mat(1,1)=1.5;
-  // Wh_i_list[0].push_back(new Eigen::MatrixXd(mat));
-  // mat(0,0)=0; mat(1,0)=1.1; mat(0,1)=1; mat(1,1)=1;
-  // Wh_i_list[0].push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=0.2; mat(1,0)=1.8; mat(0,1)=0.8; mat(1,1)=1.5;
+  Wh_i_list[0].push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=0; mat(1,0)=1.1; mat(0,1)=1; mat(1,1)=1;
+  Wh_i_list[0].push_back(new Eigen::MatrixXd(mat));
 
-  // mat(0,0)=0.2; mat(1,0)=1.8; mat(0,1)=0.8; mat(1,1)=1.5;
-  // Wh_i_list[1].push_back(new Eigen::MatrixXd(mat));
-  // mat(0,0)=0.5; mat(1,0)=-0.55; mat(0,1)=1.2; mat(1,1)=0.1;
-  // Wh_i_list[1].push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=0.2; mat(1,0)=1.8; mat(0,1)=0.8; mat(1,1)=1.5;
+  Wh_i_list[1].push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=0.5; mat(1,0)=-0.55; mat(0,1)=1.2; mat(1,1)=0.1;
+  Wh_i_list[1].push_back(new Eigen::MatrixXd(mat));
 
-  // mat(0,0)=0.5; mat(1,0)=-0.55; mat(0,1)=1.2; mat(1,1)=0.1;
-  // Wh_i_list[2].push_back(new Eigen::MatrixXd(mat));
-  // mat(0,0)=-1; mat(1,0)=-0.6; mat(0,1)=-0.4; mat(1,1)=-0.6;
-  // Wh_i_list[2].push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=0.5; mat(1,0)=-0.55; mat(0,1)=1.2; mat(1,1)=0.1;
+  Wh_i_list[2].push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=-1; mat(1,0)=-0.6; mat(0,1)=-0.4; mat(1,1)=-0.6;
+  Wh_i_list[2].push_back(new Eigen::MatrixXd(mat));
 
-  // mat(0,0)=-1; mat(1,0)=-0.6; mat(0,1)=-0.4; mat(1,1)=-0.6;
-  // Wh_i_list[3].push_back(new Eigen::MatrixXd(mat));
-  // mat(0,0)=-0.6; mat(1,0)=0.6; mat(0,1)=-0.2; mat(1,1)=1;
-  // Wh_i_list[3].push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=-1; mat(1,0)=-0.6; mat(0,1)=-0.4; mat(1,1)=-0.6;
+  Wh_i_list[3].push_back(new Eigen::MatrixXd(mat));
+  mat(0,0)=-0.6; mat(1,0)=0.6; mat(0,1)=-0.2; mat(1,1)=1;
+  Wh_i_list[3].push_back(new Eigen::MatrixXd(mat));
 
   IpoptSolver nlp_solver;
   createNLPSolver(Ph_list,Wh_i_list,nlp_solver);

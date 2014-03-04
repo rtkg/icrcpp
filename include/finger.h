@@ -137,9 +137,10 @@ class FingerParameters
   uint disc_;
   double mu_0_; ///<  friction coefficient
   double mu_T_; ///< torsional friction coefficient
-  ContactType contact_type_; ///< (undefined, f-less, frictinal, soft)
-  ModelType model_type_; ///< (undefined, single, patch -- multipoint)
+  ContactType contact_type_; ///< ( f-less, frictinal, soft)
+  ModelType model_type_; ///< ( single, patch -- multipoint)
   InclusionRule inclusion_rule_; ///< in current implementation holds just a radius if ref ICR::MultiPointContactModel is chosen.
+  WrenchInclusionTestType wrench_inclusion_test_type_; ///< how the wrench inclusion test is performed -- either Primitive, or via Convex Combination
 
  public:
   /** \brief All parameters are initialized with default values as in
@@ -154,37 +155,40 @@ class FingerParameters
    *     contact model is used. This value is used to construct the
    *     \ref inclusion_rule_ 
    */
-  FingerParameters(string name,
-		   double force_magnitude_in,
+  FingerParameters(const string name,
+		   double force_magnitude,
 		   uint disc_in,
-		   double mu_0_in, 
-		   double mu_T_in, 
-		   ContactType contact_type_in, 
-		   ModelType model_type_in, 
-		   double radius_in);
+		   double mu_0, 
+		   double mu_T, 
+		   const ContactType contact_type, 
+		   const ModelType model_type, 
+		   double patch_radius,
+                   const WrenchInclusionTestType wrench_inclusion_test_type);
+
   friend std::ostream& operator<<(std::ostream &stream,FingerParameters const& param);
   FingerParameters& operator=(FingerParameters const& src);
   ~FingerParameters();
-  void setName(string &name_in) {name_ = name_in;}
+  void setName(const string &name) {name_ = name;}
 
-  void setForce(double f_in) {assert(f_in > 0); force_magnitude_ = f_in;}
-  void setFriction(double mu_in) {assert(mu_in > 0); mu_0_ = mu_in;}
-  void setFrictionTorsional(double mu_in) {assert(mu_in > 0); mu_T_ = mu_in;}
+  void setForce(double f) {assert(f > 0); force_magnitude_ = f;}
+  void setFriction(double mu_0) {assert(mu_0 > 0); mu_0_ = mu_0;}
+  void setFrictionTorsional(double mu_T) {assert(mu_T > 0); mu_T_ = mu_T;}
 
-  void setDiscretization(uint d_in) {assert(d_in > 0); disc_ = d_in;}
+  void setDiscretization(uint d) {assert(d > 0); disc_ = d;}
 
   void setFrictionlessContact(double force_magnitude);
   void setFrictionalContact(double force_magnitude,uint disc,double mu_0);
   void setSoftFingerContact(double force_magnitude,uint disc,double mu_0, double mu_T);
-  void setContactType(ContactType contact_type);
-  void setContactType(string &contact_type);
-  void setContactModelType(ModelType model_type);
-  void setContactModelType(string &model_type);
+  void setContactType(const ContactType contact_type);
+  void setContactType(const string &contact_type);
+  void setContactModelType(const ModelType model_type);
+  void setContactModelType(const string &model_type);
   void setInclusionRule(InclusionRule const& inclusion_rule);
-  void setInclusionRuleType(RuleType rule_type);
-  void setInclusionRuleType(string &rule_type);
+  void setInclusionRuleType(const RuleType rule_type);
+  void setInclusionRuleType(const string &rule_type);
   void setInclusionRuleParameter(double rule_parameter);
   void setInclusionRuleFilterPatch(bool filter_inside_points);
+  void setWrenchIncusionTestType(const WrenchInclusionTestType wrench_inclusion_test_type);
 
   double getForceMagnitude()const;
   string getName()const;
@@ -197,6 +201,7 @@ class FingerParameters
   RuleType getInclusionRuleType()const;
   uint getInclusionRuleParameter()const;
   bool getInclusionRuleFilterPatch()const;
+  WrenchInclusionTestType getWrenchInclusionTestType()const;
 
 };
 
@@ -217,6 +222,7 @@ class Finger
   uint centerpoint_id_;
   bool initialized_;
   string name_;
+  WrenchInclusionTestType wrench_inclusion_test_type_;
 
  public:
 
@@ -226,7 +232,8 @@ class Finger
   Finger& operator=(Finger const& src);
   friend std::ostream& operator<<(std::ostream& stream,Finger const& finger);
   ~Finger();
- 
+
+  void setWrenchIncusionTestType(const WrenchInclusionTestType wrench_inclusion_test_type);
   void init(uint centerpoint_id, const PatchListPtr patches, const OWSPtr ows);
   void setCenterPointId(uint centerpoint_id);
   Patch const* getCenterPointPatch() const;
@@ -239,7 +246,7 @@ class Finger
   bool isInitialized()const;
   string getName()const;
   void setName(string const & name);
-
+  WrenchInclusionTestType getWrenchInclusionTestType()const;
 };
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------

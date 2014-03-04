@@ -8,7 +8,7 @@
 CC       = gcc
 CXX      = g++
 CFLAGS   = -pipe -W -O2 -fPIC 
-CXXFLAGS = -pipe -Werror -Wcast-qual -W -Wwrite-strings -Wno-sign-compare -O3 -g -fPIC -msse2 -std=gnu++0x 
+CXXFLAGS = -pipe -Werror -W -Wwrite-strings -Wno-sign-compare -O3 -g -fPIC -msse2 -std=gnu++0x 
 AR       = ar cqs 
 DEL_FILE = rm -f
 
@@ -22,6 +22,8 @@ INCPATH  = -I ./tools/eigen-eigen-3.0.2            #eigen headers
 INCPATH += -I ./tools/Qhull-2011.2/src             #qhull headers
 INCPATH += -I ./tools/obj-1.0/build/include        #libobj headers
 INCPATH += -I /home/rkg/Software/casadi            #CasADi headers
+INCPATH += -I /home/rkg/Software/qpOASES-3.0beta/include #qpOASES headers
+INCPATH += -I /home/rkg/Data/Programs/gurobi562/linux64/include #Gurobi headers
 
 ####### Files for compiling the code
 

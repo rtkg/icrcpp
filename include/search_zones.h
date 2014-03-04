@@ -62,6 +62,7 @@ namespace ICR
     void extractWhiList(std::vector< ContactRegion * > const & conditioning_patches,std::vector<std::vector<Eigen::MatrixXd*> >& Wh_i_list)const;
     void createDiscreteTWSNLPSolver(const std::vector<Eigen::MatrixXd*>& Ph_list,const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list,CasADi::IpoptSolver& nlp_solver);
     void initialSolutionTWSNLP(CasADi::DMatrix& initial_solution, const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list);
+    void setTWSNLPHyperplanes(const CasADi::IpoptSolver& nlp_solver,const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list);
     SearchZones();
 
   public:

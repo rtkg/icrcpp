@@ -44,11 +44,12 @@ struct PrimitiveSearchZone;
 struct Patch;
 struct InclusionRule;
 
-enum ContactType {Undefined_CT=1,Frictionless, Frictional, Soft_Finger};
-enum ModelType {Undefined_MT=1,Single_Point,Multi_Point};
-enum RuleType {Undefined_RT=1,Sphere};
-enum WrenchSpaceType {Undefined_WS=1,Discrete,Spherical};
-enum ICRType {Undefined_ICR=1,BFS,Full};
+enum ContactType {Frictionless=1, Frictional, Soft_Finger};
+enum ModelType {Single_Point=1,Multi_Point};
+enum RuleType {Sphere=1};
+enum WrenchSpaceType {Discrete=1,Spherical};
+enum ICRType {BFS=1,Full};
+enum WrenchInclusionTestType {Primitive=1,Convex_Combination};
 
 typedef unsigned int uint;
 typedef Eigen::Matrix<double,6,Eigen::Dynamic> Matrix6Xd;

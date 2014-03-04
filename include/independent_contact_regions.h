@@ -14,10 +14,12 @@ namespace ICR
  *  the target object's surface for inclusion in the independent
  *  regions
  */
+
 class IndependentContactRegions
 {
 
  private:
+
 
   SearchZonesPtr search_zones_;
   GraspPtr grasp_;
@@ -30,9 +32,10 @@ class IndependentContactRegions
  *  is the half-space which does not contain the origin;
  */
   bool primitiveSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const;
-  bool searchZoneInclusionTest(uint region_id,Patch const* patch)const;
-  void computeContactRegionBFS(uint region_id);
-  void computeContactRegionFull(uint region_id);
+ bool convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const;
+  bool searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type)const;
+  void computeContactRegionBFS(uint region_id, const WrenchInclusionTestType wrench_inclusion_test_type);
+  void computeContactRegionFull(uint region_id, const WrenchInclusionTestType wrench_inclusion_test_type);
 
  public:
   IndependentContactRegions();
@@ -45,6 +48,7 @@ class IndependentContactRegions
   ~IndependentContactRegions();
 
   void clear();
+  uint getNumICRPoints()const;
   void computeICR(ICRType type);
   bool icrComputed()const;
   ContactRegion const* getContactRegion(uint id)const;

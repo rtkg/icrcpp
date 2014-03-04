@@ -15,13 +15,18 @@ int main()
   //vector of centerpoint contact id's for the 
   FParamList f_parameters;
   FingerParameters parameters;
+  parameters.setFrictionalContact (1, 8, 0.8);
+  parameters.setWrenchIncusionTestType(Primitive);
+
+  //parameters.setSoftFingerContact(1, 8, 0.8, 0.8);
   uint n_fingers=3; //number of fingers in the prototype grasp
   for (int i=0;i<n_fingers;i++)
     f_parameters.push_back(parameters);
   
   VectorXui centerpoint_ids(n_fingers);
-   //centerpoint_ids=generateRandomGrasp(obj_loader.getObject(),f_parameters);
-   centerpoint_ids<<346, 3131, 6168;// centerpoint_ids << 1838, 4526, 4362, 1083, 793;
+  //centerpoint_ids=generateRandomGrasp(obj_loader.getObject(),f_parameters);
+  //centerpoint_ids << 2036, 4508;  //centerpoint_ids<<346, 3131, 6168;// centerpoint_ids << 1838, 4526, 4362, 1083, 793; centerpoint_ids << 2036, 4508;
+  centerpoint_ids<<346, 3131, 6168;
 
   //Create a prototype grasp and search zones, the parameter alpha is the scale of the largest
   //origin-centered ball contained by the Grasp wrench space of the prototype grasp
@@ -30,36 +35,43 @@ int main()
   SearchZonesPtr search_zones(new SearchZones(prototype_grasp));
 
   //  Create a new Discrete Task Wrench Space
-  double *a;
-  eigenMatrixToDoubleArray(Eigen::MatrixXd::Identity(6,6)*1.0e-4,a);
+  double *a=new double[6]; std::fill_n(a, 6, 0); 
+
   SharedDoublePtr t_wrenches(a); 
-  DiscreteTaskWrenchSpacePtr tws(new DiscreteTaskWrenchSpace(6,t_wrenches,6));  // 	DiscreteTaskWrenchSpace (uint dimension, SharedDoublePtr wrenches, uint num_wrenches)
+  DiscreteTaskWrenchSpacePtr tws(new DiscreteTaskWrenchSpace(6,t_wrenches,1));  // 	DiscreteTaskWrenchSpace (uint dimension, SharedDoublePtr wrenches, uint num_wrenches)
   search_zones->setTaskWrenchSpace(tws);
+  //  SphericalWrenchSpacePtr tws(new SphericalWrenchSpace(6,1e-5));
+  //  search_zones->setTaskWrenchSpace(tws);
 
-  //Create a set of conditioning patches;
-  std::vector< ContactRegion * > conditioning_patches(centerpoint_ids.rows());
-  double inclusion_radius= 5; //radius of the sphere used for patch inclusion
-  for (int n=0; n<centerpoint_ids.rows();n++)
-    {
-      Patch* patch(new Patch(centerpoint_ids(n), *obj_loader.getObject(),InclusionRule(inclusion_radius,Sphere,true)));
-      std::cout<<(*patch)<<std::endl;
-      conditioning_patches[n]=new ContactRegion();
-      conditioning_patches[n]->push_back(patch);
-    }
+  search_zones->computeShiftedSearchZones();
 
-  search_zones->computeConditionedSearchZones(conditioning_patches);
-  //  // //Create and plot the Independent Contact Regions
-  //  // IndependentContactRegions icr(search_zones,prototype_grasp);
-  //  // icr.computeICR(BFS); //explore points for inclusion via a Breadth-First Search with the prototype grasp's centerpoints as root nodes
-  //  // std::cout<<icr;
+  //Create and plot the Independent Contact Regions
+  IndependentContactRegions icr(search_zones,prototype_grasp);
 
-  //clean up
-  for (int n=0; n<centerpoint_ids.rows();n++)
-    {
-      for (int p=0; p<conditioning_patches[n]->size();p++)
-	delete conditioning_patches[n]->at(p);
+  struct timeval start, end;
+  double c_time;
+  gettimeofday(&start,0);
+  icr.computeICR(BFS); //explore points for inclusion via a Breadth-First Search with the prototype grasp's centerpoints as root nodes
+  gettimeofday(&end,0);
+  c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
+  std::cout<<"Computation time: "<<c_time<<" s"<<std::endl;
 
-      delete conditioning_patches[n];
-    }
+  std::cout<<"HF: "<<icr<<std::endl;
+   std::cout<<"Number of ICR points: "<<icr.getNumICRPoints()<<std::endl;
+
+
+  //  parameters.setSoftFingerContact(1, 8, 0.8, 0.8);
+  //   for (int i=0;i<n_fingers;i++)
+  //     f_parameters[i]=parameters;
+
+  //   prototype_grasp.reset(new Grasp());
+  //   prototype_grasp->init(f_parameters,obj_loader.getObject(),centerpoint_ids);
+  //   search_zones.reset(new SearchZones(prototype_grasp));
+  //   search_zones->setTaskWrenchSpace(tws);
+  //   search_zones->computeShiftedSearchZones();
+  //   IndependentContactRegions icr2(search_zones,prototype_grasp);
+  // icr2.computeICR(BFS);
+
+  //   std::cout<<"SF: "<<icr2;
   return 0;
 }

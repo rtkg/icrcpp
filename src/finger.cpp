@@ -14,20 +14,14 @@ InclusionRule::InclusionRule() :
   rule_type_(DEFAULT_INCLUSION_RULE_TYPE),
   filter_inside_points_(DEFAULT_INCLUSION_RULE_FILTER_INSIDE_POINTS) {}
 //------------------------------------------------------
-  InclusionRule::InclusionRule(double rp_in, RuleType rt_in, bool filter_in) : 
-    filter_inside_points_(filter_in) 
+  InclusionRule::InclusionRule(double rp, RuleType rt, bool filter) : 
+    filter_inside_points_(filter) 
   {
-    if (rp_in < 0) {
-      rule_parameter_ = DEFAULT_INCLUSION_RULE_PARAMETER;
-    } else {
-      rule_parameter_ = rp_in;
-    }
+    assert(rp >= 0);
 
-    if (rt_in != Undefined_RT || rt_in != Sphere) {
-      rule_type_ = DEFAULT_INCLUSION_RULE_TYPE;
-    } else {
-      rule_type_ = rt_in;
-    }
+    rule_parameter_=rp;
+    rule_type_ = rt;
+    
   }
 //------------------------------------------------------
 bool InclusionRule::inclusionTest(ContactPoint const* center_point, ContactPoint const* test_point)const
@@ -51,7 +45,6 @@ std::ostream& operator<<(std::ostream &stream,InclusionRule const& inclusion_rul
   std::string rule_type;
 
  if (inclusion_rule.rule_type_==Sphere) rule_type="Sphere";
-  else if (inclusion_rule.rule_type_==Undefined_RT)  rule_type="Undefined";
   else rule_type="Warning in InclusionRule: Invalid rule type!";
 
   stream <<'\n'<<"INCLUSION RULE: "<<'\n'
@@ -172,7 +165,8 @@ FingerParameters::FingerParameters() :
   mu_T_(DEFAULT_MU_T),
   contact_type_(DEFAULT_CONTACT_TYPE),
   model_type_(DEFAULT_CONTACT_MODEL_TYPE),
-  inclusion_rule_(InclusionRule(DEFAULT_INCLUSION_RULE_PARAMETER)) {}
+  inclusion_rule_(InclusionRule(DEFAULT_INCLUSION_RULE_PARAMETER)),
+  wrench_inclusion_test_type_(DEFAULT_WRENCH_INCLUSION_TEST_TYPE) {}
 //--------------------------------------------------------------------------
 FingerParameters::FingerParameters(FingerParameters const& src) : 
   name_(src.name_),
@@ -182,54 +176,31 @@ FingerParameters::FingerParameters(FingerParameters const& src) :
   mu_T_(src.mu_T_), 
   contact_type_(src.contact_type_),
   model_type_(src.model_type_), 
-  inclusion_rule_(src.inclusion_rule_) {}
+  inclusion_rule_(src.inclusion_rule_),
+  wrench_inclusion_test_type_(src.wrench_inclusion_test_type_) {}
 //--------------------------------------------------------------------------
-FingerParameters::FingerParameters(string name, 
-				   double force_magnitude_in,
-				   uint disc_in,
-				   double mu_0_in, 
-				   double mu_T_in, 
-				   ContactType contact_type_in, 
-				   ModelType model_type_in, 
-				   double radius_in) {
+FingerParameters::FingerParameters(const string name, 
+				   double force_magnitude,
+				   uint disc,
+				   double mu_0, 
+				   double mu_T, 
+				   const ContactType contact_type, 
+				   const ModelType model_type, 
+				   double patch_radius,
+                                   const WrenchInclusionTestType wrench_inclusion_test_type) 
+{
+
   name_ = name;
-  if (force_magnitude_in <= 0) {
-    force_magnitude_ = DEFAULT_FORCE_MAGNITUDE;
-  } else {
-      force_magnitude_ = force_magnitude_in;
-  }
-  
-  if (disc_in < 4) {
-    disc_ = DEFAULT_DISC;
-  } else {
-    disc_ = disc_in;
-  }
-  if(mu_0_in <= 0) {
-    mu_0_ = DEFAULT_MU_0;
-  } else {
-    mu_0_ = mu_0_in;
-  }
-  if(mu_T_in <= 0) {
-    mu_T_ = DEFAULT_MU_T;
-  } else {
-    mu_T_ = mu_T_in;
-  }
-  if(contact_type_in != Undefined_CT || contact_type_in != Frictional ||
-     contact_type_in != Frictional || contact_type_in != Soft_Finger) {
-    contact_type_ = DEFAULT_CONTACT_TYPE;
-  } else {
-    contact_type_ = contact_type_in;
-  }
-  if(model_type_in != Undefined_MT || model_type_in != Single_Point || model_type_in != Multi_Point) {
-    model_type_ = DEFAULT_CONTACT_MODEL_TYPE;
-  } else {
-    model_type_ = model_type_in;
-  }
-  if (radius_in < 0) {
-    inclusion_rule_ = InclusionRule(DEFAULT_INCLUSION_RULE_PARAMETER);
-  } else {
-    inclusion_rule_ = InclusionRule(radius_in);
-  }
+  assert((force_magnitude > 0) && (disc > 0) && (mu_0 >= 0) && (mu_T >= 0) && (patch_radius >= 0));
+
+    force_magnitude_=force_magnitude;
+    disc_=disc;
+    mu_0_=mu_0;
+    mu_T_=mu_T;
+    contact_type_=contact_type;
+    model_type_=model_type;
+    inclusion_rule_=InclusionRule(patch_radius);
+    wrench_inclusion_test_type_=wrench_inclusion_test_type;
 }
 //--------------------------------------------------------------------------
 FingerParameters& FingerParameters::operator=(FingerParameters const& src)
@@ -244,6 +215,7 @@ FingerParameters& FingerParameters::operator=(FingerParameters const& src)
       contact_type_=src.contact_type_;
       model_type_=src.model_type_;
       inclusion_rule_=src.inclusion_rule_;
+      wrench_inclusion_test_type_=src.wrench_inclusion_test_type_;
     }
   return *this;
 }
@@ -253,21 +225,23 @@ std::ostream& operator<<(std::ostream &stream,FingerParameters const& param)
   std::string contact_type;
   std::string model_type;
   std::string rule_type;
+  std::string wrench_inclusion_test_type;
 
     if (param.contact_type_==Frictionless) contact_type="Frictionless";
   else if (param.contact_type_==Frictional)   contact_type="Frictional";
   else if (param.contact_type_==Soft_Finger)  contact_type="Soft Finger";
-  else if (param.contact_type_==Undefined_CT)  contact_type="Undefined";
   else contact_type="Warning in FingerParameters: Invalid contact type!";
 
      if (param.model_type_==Single_Point) model_type="Single Point";
   else if (param.model_type_==Multi_Point)   model_type="Multi Point";
-  else if (param.model_type_==Undefined_MT)  model_type="Undefined";
   else model_type="Warning in FingerParameters: Invalid model type!";
 
  if (param.inclusion_rule_.rule_type_==Sphere) rule_type="Sphere";
-  else if (param.inclusion_rule_.rule_type_==Undefined_RT)  rule_type="Undefined";
   else rule_type="Warning in FingerParameters: Invalid rule type!";
+
+ if (param.wrench_inclusion_test_type_==Primitive) wrench_inclusion_test_type="Primitive";
+ else if (param.wrench_inclusion_test_type_==Convex_Combination) wrench_inclusion_test_type="Convex_Combination";
+  else wrench_inclusion_test_type="Warning in FingerParameters: Invalid wrench inclusion test type!";
 
   stream <<'\n'<<"FINGER PARAMETERS: "<<'\n'
 	 <<"Name: " << param.name_ << '\n'
@@ -278,7 +252,8 @@ std::ostream& operator<<(std::ostream &stream,FingerParameters const& param)
          <<"Contact type: "<<contact_type<<'\n'
          <<"Model type: "<<model_type<<'\n'
          <<"Inclusion rule type: "<<rule_type<<'\n'
-         <<"Inclusion rule parameter: "<<param.inclusion_rule_.rule_parameter_<<'\n'<< std::endl;
+         <<"Inclusion rule parameter: "<<param.inclusion_rule_.rule_parameter_<<'\n'
+         <<"Wrench inclusion test type: "<<wrench_inclusion_test_type<<'\n'<< std::endl;
 
   return stream;
 }        
@@ -315,45 +290,49 @@ void FingerParameters::setSoftFingerContact(double force_magnitude,uint disc,dou
   mu_T_=mu_T;
   contact_type_=Soft_Finger;
 }
-
-void FingerParameters::setContactType(ContactType contact_type_in) {
-  contact_type_ = contact_type_in;
+//--------------------------------------------------------------------------
+void FingerParameters::setContactType(const ContactType contact_type) {
+  contact_type_ = contact_type;
 }
-
-void FingerParameters::setContactType(string &contact_type_in) {
-  if (contact_type_in.compare("Frictionless") == 0) {
+//--------------------------------------------------------------------------
+void FingerParameters::setContactType(const string &contact_type) {
+  if (contact_type.compare("Frictionless") == 0) {
     contact_type_ = Frictionless;
-  } else if (contact_type_in.compare("Frictional") == 0) {
+  } else if (contact_type.compare("Frictional") == 0) {
     contact_type_ = Frictional;
-  } else if (contact_type_in.compare("Soft_Finger") == 0) {
+  } else if (contact_type.compare("Soft_Finger") == 0) {
     contact_type_ = Soft_Finger;
   } else {
-    contact_type_ = Undefined_CT;
+    std::cout<<"Error: Undefined contact type in FingerParameters::setContactType(const string& contact_type)!"<<std::endl;
+    exit(0);
   } 
 }
-
 //--------------------------------------------------------------------------
-void FingerParameters::setContactModelType(ModelType model_type){model_type_=model_type;}
-
-void FingerParameters::setContactModelType(std::string &model_type_in){
-  if (model_type_in.compare("Single_Point") == 0) {
+  void FingerParameters::setWrenchIncusionTestType(const WrenchInclusionTestType wrench_inclusion_test_type){wrench_inclusion_test_type_=wrench_inclusion_test_type;}
+//--------------------------------------------------------------------------
+void FingerParameters::setContactModelType(const ModelType model_type){model_type_=model_type;}
+//--------------------------------------------------------------------------
+void FingerParameters::setContactModelType(const std::string &model_type){
+  if (model_type.compare("Single_Point") == 0) {
     model_type_=Single_Point;
-  } else if (model_type_in.compare("Multi_Point") == 0) {
+  } else if (model_type.compare("Multi_Point") == 0) {
     model_type_=Single_Point;
   } else {
-    model_type_=Undefined_MT;
+ std::cout<<"Error: Undefined contact type in FingerParameters::setContactModelType(const std::string &model_type)!"<<std::endl;
+ exit(0);
   }
 }
 //--------------------------------------------------------------------------
 void FingerParameters::setInclusionRule(InclusionRule const& inclusion_rule){inclusion_rule_=inclusion_rule;}
 //--------------------------------------------------------------------------
-void FingerParameters::setInclusionRuleType(RuleType rule_type){inclusion_rule_.rule_type_=rule_type;}
-
-void FingerParameters::setInclusionRuleType(std::string &rule_type_in) {
-  if (rule_type_in.compare("Sphere") == 0) {
+void FingerParameters::setInclusionRuleType(const RuleType rule_type){inclusion_rule_.rule_type_=rule_type;}
+//--------------------------------------------------------------------------
+void FingerParameters::setInclusionRuleType(const std::string &rule_type) {
+  if (rule_type.compare("Sphere") == 0) {
     inclusion_rule_.rule_type_=Sphere;
   } else {
-    inclusion_rule_.rule_type_=Undefined_RT;
+ std::cout<<"Error: Undefined inclusion rule type in FingerParameters::setInclusionRuleType(const std::string &rule_type_in)!"<<std::endl;
+ exit(0);
   }
 }
 
@@ -382,7 +361,9 @@ RuleType FingerParameters::getInclusionRuleType()const{return inclusion_rule_.ru
 //-------------------------------------------------------------------
 uint FingerParameters::getInclusionRuleParameter()const{return inclusion_rule_.rule_parameter_;}
 //-------------------------------------------------------------------
-bool FingerParameters:: getInclusionRuleFilterPatch()const{return inclusion_rule_.filter_inside_points_;}
+bool FingerParameters::getInclusionRuleFilterPatch()const{return inclusion_rule_.filter_inside_points_;}
+//-------------------------------------------------------------------
+  WrenchInclusionTestType FingerParameters::getWrenchInclusionTestType()const{return wrench_inclusion_test_type_;}
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 Finger::Finger() : c_model_(NULL), centerpoint_id_(0), initialized_(false), name_("default")
@@ -395,9 +376,10 @@ Finger::Finger() : c_model_(NULL), centerpoint_id_(0), initialized_(false), name
     c_model_=new MultiPointContactModel(default_param); 
   else
     {
-      std::cout<<"Error in Finger: Invalid contact model type. exiting..."<<std::endl;
-      exit(1);
+      std::cout<<"Error in Finger::Finger(): Invalid contact model type. exiting..."<<std::endl;
+      exit(0);
     }
+  wrench_inclusion_test_type_=default_param.getWrenchInclusionTestType();
 }
 //--------------------------------------------------------------------------
 Finger::Finger(FingerParameters const& param) : 
@@ -411,13 +393,14 @@ Finger::Finger(FingerParameters const& param) :
     c_model_=new MultiPointContactModel(param); 
   else
     {
-      std::cout<<"Error in Finger: Invalid contact model type. exiting..."<<std::endl;
-      exit(1);
+      std::cout<<"Error in Finger::Finger(FingerParameters const& param): Invalid contact model type. exiting..."<<std::endl;
+      exit(0);
     }
+  wrench_inclusion_test_type_=param.getWrenchInclusionTestType();
 }
 //--------------------------------------------------------------------------
 Finger::Finger(Finger const& src) : c_model_(src.c_model_), ows_(src.ows_), patches_(src.patches_),
-				    centerpoint_id_(src.centerpoint_id_), initialized_(src.initialized_),name_("default"){}
+				    centerpoint_id_(src.centerpoint_id_), initialized_(src.initialized_),name_("default"),wrench_inclusion_test_type_(src.wrench_inclusion_test_type_){}
 //--------------------------------------------------------------------------
 Finger& Finger::operator=(const Finger& src)		  
 {
@@ -429,14 +412,22 @@ Finger& Finger::operator=(const Finger& src)
       centerpoint_id_=src.centerpoint_id_;
       initialized_=src.initialized_;
       name_=src.name_;
+      wrench_inclusion_test_type_=src.wrench_inclusion_test_type_;
     }
   return *this;
 }
 //--------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& stream,Finger const& finger)
 {
+  std::string wrench_inclusion_test_type;
+ if (finger.wrench_inclusion_test_type_==Primitive) wrench_inclusion_test_type="Primitive";
+ else if (finger.wrench_inclusion_test_type_==Convex_Combination) wrench_inclusion_test_type="Convex_Combination";
+  else wrench_inclusion_test_type="Warning in Finger: Invalid wrench inclusion test type!";
+
+
   stream <<'\n'<<"FINGER: "<<'\n'
 	 <<"Is initialized: "<<std::boolalpha<<finger.initialized_<<'\n'
+	 <<"Wrench inclusion test type: "<<wrench_inclusion_test_type<<'\n'
          <<"Centerpoint id: "<<finger.centerpoint_id_<<'\n'<<'\n';
 
   return stream;
@@ -475,6 +466,10 @@ void Finger::setCenterPointId(uint centerpoint_id)
   assert(initialized_);
   centerpoint_id_=centerpoint_id;
 }
+//--------------------------------------------------------------------------
+void Finger::setWrenchIncusionTestType(const WrenchInclusionTestType wrench_inclusion_test_type){wrench_inclusion_test_type_=wrench_inclusion_test_type;}
+//--------------------------------------------------------------------------
+ WrenchInclusionTestType Finger::getWrenchInclusionTestType()const{return wrench_inclusion_test_type_;}
 //--------------------------------------------------------------------------
 void Finger::init(uint centerpoint_id, const PatchListPtr patches, const OWSPtr ows)
 {

@@ -78,7 +78,6 @@ std::ostream& operator<<(std::ostream& stream, PointContactModel const& pc_model
 
   if (pc_model.model_type_==Single_Point) model_type="Single Point";
   else if (pc_model.model_type_==Multi_Point)  model_type="Multi Point";
-  else if (pc_model.model_type_==Undefined_MT)  model_type="Undefined";
   else model_type="Warning in ContactModel: Invalid model type!";
 
   stream <<'\n'<<"CONTACT MODEL: "<<'\n'

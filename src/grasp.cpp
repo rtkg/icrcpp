@@ -106,7 +106,7 @@ PatchListPtr Grasp::computePatches(Finger* new_finger)
   else
     {
       std::cout<<"Error in Grasp::computePatches - Invalid contact model type. Exiting..."<<std::endl;
-      exit(1);
+      exit(0);
     }
   return patches;
 }
@@ -130,8 +130,8 @@ OWSPtr Grasp::computeOWS(Finger const* new_finger)
 //------------------------------------------------------------------
 void Grasp::addFinger(FingerParameters const& param, uint centerpoint_id)
 {
-  Finger* new_finger=new Finger(param); 
 
+  Finger* new_finger=new Finger(param); 
 
   new_finger->setName(param.getName());
   new_finger->init(centerpoint_id,computePatches(new_finger),computeOWS(new_finger));

@@ -12,7 +12,8 @@ LIBS += -L ../tools/obj-1.0/build/lib -lobj               #include libobj librar
 LIBS += -L ../tools/Qhull-2011.2/lib -lqhullcpp -lqhull6  #include qhull libs LINK ORDER MATTERS!!!
 LIBS += -L /home/rkg/Software/casadi/build/lib  -lcasadi_ipopt_interface -lcasadi    
 LIBS += -L /usr/local/lib -ldl -lipopt -llapack -lcoinmumps -lblas -lcoinmetis -lcoinhsl
-
+LIBS += -Wl,-rpath,/home/rkg/Software/qpOASES-3.0beta/bin -L/home/rkg/Software/qpOASES-3.0beta/bin -lqpOASES
+LIBS += -Wl,-rpath,/home/rkg/Data/Programs/gurobi562/linux64/lib -L/home/rkg/Data/Programs/gurobi562/linux64/lib/ -lgurobi_c++ -lgurobi56 
 
 FN=warp_test
 
