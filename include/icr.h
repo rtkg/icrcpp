@@ -87,6 +87,8 @@
  *    undefined facets - should find some workaround for this to reduce the unnecessary large number
  *    of hyperplanes
  *
+ *- Make a 'Gotcha' test to check the LP solutions are truly correct!
+ *
  *- Try a version of the LP-based inclusion test as one 'big' LP for all hyperplanes in a primivive search zone
  *
  */

@@ -9,9 +9,9 @@
 #include "../include/config.h"
 #include "assert.h"
 #include <thread>
-#include <qpOASES.hpp>
+
 #include <gurobi_c++.h>
-#include <iomanip>
+
 #include <sys/time.h>
 #include <time.h>
 
@@ -206,8 +206,8 @@ namespace ICR
 	psz_satisfied=false;
 	for(ConstIndexListIterator patch_point=patch->patch_ids_.begin(); patch_point != patch->patch_ids_.end(); patch_point++)
 	  {
-	    struct timeval start, end;
-	    double c_time;
+	    //struct timeval start, end;
+	    //double c_time;
 	    // gettimeofday(&start,0);
 
 	    if(wrench_inclusion_test_type==Primitive)

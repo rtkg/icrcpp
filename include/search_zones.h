@@ -5,10 +5,6 @@
 #include "utilities.h"
 #include "ows.h"
 #include <libqhullcpp/Qhull.h>
-#include <iomanip>
-#include <symbolic/casadi.hpp>
-#include <interfaces/ipopt/ipopt_solver.hpp>
-#include <symbolic/stl_vector_tools.hpp>
 
 namespace ICR
 {
@@ -50,19 +46,18 @@ namespace ICR
     Eigen::Matrix<double,Eigen::Dynamic,6> hyperplane_normals_;
     Eigen::VectorXd hyperplane_offsets_;  
 
-    void computeConditionedHyperplanes(std::vector< ContactRegion * > const & conditioning_patches);
+    //  void computeConditionedHyperplanes(std::vector< ContactRegion * > const & conditioning_patches);
     void computeShiftedHyperplanes();
     void initializeSearchZones();
     void addShiftedPrimitiveSearchZone(uint finger_id,vertexT const* curr_vtx);
     void resetPrimitiveSearchZones(uint sz_id);    
     void clear();
     void computePrimitiveSearchZones();
-    void mapFacetToFinger(const orgQhull::QhullFacet& facet,IndexList & finger_ids)const;
-    void extractPhList(std::vector<Eigen::MatrixXd*>& Ph_list)const;
-    void extractWhiList(std::vector< ContactRegion * > const & conditioning_patches,std::vector<std::vector<Eigen::MatrixXd*> >& Wh_i_list)const;
-    void createDiscreteTWSNLPSolver(const std::vector<Eigen::MatrixXd*>& Ph_list,const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list,CasADi::IpoptSolver& nlp_solver);
-    void initialSolutionTWSNLP(CasADi::DMatrix& initial_solution, const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list);
-    void setTWSNLPHyperplanes(const CasADi::IpoptSolver& nlp_solver,const std::vector<std::vector<Eigen::MatrixXd* > >& Wh_i_list);
+    //    void mapFacetToFinger(const orgQhull::QhullFacet& facet,IndexList & finger_ids)const;
+    //    void extractPhList(std::vector<Eigen::MatrixXd*>& Ph_list)const;
+    //    void extractWhiList(std::vector< ContactRegion * > const & conditioning_patches,std::vector<std::vector<Eigen::MatrixXd*> >& Wh_i_list)const;
+
+ 
     SearchZones();
 
   public:
@@ -81,7 +76,7 @@ namespace ICR
      *  tangent to a Task Wrench Space 
      */
     void computeShiftedSearchZones();
-    void computeConditionedSearchZones(std::vector< ContactRegion * > const & conditioning_patches);
+    //    void computeConditionedSearchZones(std::vector< ContactRegion * > const & conditioning_patches);
     const GraspPtr getGrasp()const;
     SearchZone const* getSearchZone(uint finger_id)const;
     uint getNumSearchZones()const;
@@ -100,8 +95,6 @@ namespace ICR
     Eigen::VectorXd const*getHyperplaneOffsets()const;
     WrenchSpacePtr getTaskWrenchSpace()const;
   };
-  //-------------------------------------------------------------------
-  CasADi::FX generateCodeAndCompile(CasADi::FX fcn, const std::string& name);
   //-------------------------------------------------------------------
 }//namespace ICR
 #endif

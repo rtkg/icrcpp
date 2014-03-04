@@ -10,12 +10,9 @@ CFLAGS = -O3 -g -fPIC -std=gnu++0x
 LIBS  = -L ../lib -licr                                   #include libicr library
 LIBS += -L ../tools/obj-1.0/build/lib -lobj               #include libobj library
 LIBS += -L ../tools/Qhull-2011.2/lib -lqhullcpp -lqhull6  #include qhull libs LINK ORDER MATTERS!!!
-LIBS += -L /home/rkg/Software/casadi/build/lib  -lcasadi_ipopt_interface -lcasadi    
-LIBS += -L /usr/local/lib -ldl -lipopt -llapack -lcoinmumps -lblas -lcoinmetis -lcoinhsl
-LIBS += -Wl,-rpath,/home/rkg/Software/qpOASES-3.0beta/bin -L/home/rkg/Software/qpOASES-3.0beta/bin -lqpOASES
 LIBS += -Wl,-rpath,/home/rkg/Data/Programs/gurobi562/linux64/lib -L/home/rkg/Data/Programs/gurobi562/linux64/lib/ -lgurobi_c++ -lgurobi56 
 
-FN=warp_test
+FN=example
 
 IDIR += -I ../tools/eigen-eigen-3.0.2            #include eigen headers
 IDIR += -I ../tools/Qhull-2011.2/src             #include qhull headers
