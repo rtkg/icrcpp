@@ -426,9 +426,9 @@ namespace ICR
 	      delete[] r_i[i];
 
 	    delete[] x; delete[] lb_x; delete[] x_opt; 
-	    delete p_i; delete[] eq_c_senses; delete[] eq_c_rhs; delete[] eq_c; delete[] eq_c_expr;
-	    delete r_i; delete[] ineq_c_R_senses; delete[] ineq_c_R_rhs; delete[] ineq_c_R; delete[] ineq_c_R_expr;
-	    delete t_i; delete[] ineq_c_T_senses; delete[] ineq_c_T_rhs; delete[] ineq_c_T; delete[] ineq_c_T_expr; 
+	    delete[] p_i; delete[] eq_c_senses; delete[] eq_c_rhs; delete[] eq_c; delete[] eq_c_expr;
+	    delete[] r_i; delete[] ineq_c_R_senses; delete[] ineq_c_R_rhs; delete[] ineq_c_R; delete[] ineq_c_R_expr;
+	    delete[] t_i; delete[] ineq_c_T_senses; delete[] ineq_c_T_rhs; delete[] ineq_c_T; delete[] ineq_c_T_expr; 
 	  }
       }
     else

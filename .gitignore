@@ -30,6 +30,7 @@ build/*/RelWithDebInfo/*
 doc/html
 tools
 examples/ex
+debug/*.txt
 *.a
 *.dll
 *.lib

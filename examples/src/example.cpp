@@ -46,8 +46,8 @@ int main()
   struct timeval start, end;
   double c_time;
   gettimeofday(&start,0);
-  search_zones->computePrioritizedSearchZones(1);
-  //search_zones->computeShiftedSearchZones();
+  //search_zones->computePrioritizedSearchZones(1);
+  search_zones->computeShiftedSearchZones();
   gettimeofday(&end,0);
   c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
   std::cout<<"Computation time search zones: "<<c_time<<" s"<<std::endl;

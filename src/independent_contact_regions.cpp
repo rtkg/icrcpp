@@ -142,7 +142,7 @@ namespace ICR
 
 	if (status != GRB_OPTIMAL) 
 	  {
-	    delete ineq_constrs;
+	    delete[] ineq_constrs;
 	    return false;
 	  }
 

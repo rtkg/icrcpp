@@ -95,6 +95,8 @@
  *
  *- Also write the loaded mesh to a file if the according debug flag is set
  *
+ *- Check for memory leaks
+ *
  */
 
 #include "utilities.h"

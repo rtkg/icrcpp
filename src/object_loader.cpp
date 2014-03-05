@@ -91,10 +91,10 @@ void ObjectLoader::loadObject(std::string const& file,std::string const& name)
   for(uint cp_id=0; cp_id < object_->num_cp_; cp_id++)
     {
         object_->contact_points_[cp_id]->filterDuplicateNeighbors();
-        delete points_buffer[cp_id];
+        delete[] points_buffer[cp_id];
     }
   for(uint vn_id=0; vn_id < normals_buffer.size(); vn_id++)
-    delete normals_buffer[vn_id];
+    delete[] normals_buffer[vn_id];
  
   object_->name_=name;
   object_loaded_=true;
