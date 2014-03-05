@@ -16,7 +16,7 @@ int main()
   FParamList f_parameters;
   FingerParameters parameters;
   parameters.setFrictionalContact (1, 8, 0.8);
-  parameters.setWrenchIncusionTestType(Primitive);
+  parameters.setWrenchIncusionTestType(Convex_Combination);
 
   //parameters.setSoftFingerContact(1, 8, 0.8, 0.8);
   uint n_fingers=3; //number of fingers in the prototype grasp
@@ -46,7 +46,8 @@ int main()
   struct timeval start, end;
   double c_time;
   gettimeofday(&start,0);
-  search_zones->computePrioritizedSearchZones(0);
+  search_zones->computePrioritizedSearchZones(1);
+  //search_zones->computeShiftedSearchZones();
   gettimeofday(&end,0);
   c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
   std::cout<<"Computation time search zones: "<<c_time<<" s"<<std::endl;

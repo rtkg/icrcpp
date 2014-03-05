@@ -3,16 +3,13 @@
 #include "../include/grasp.h"
 #include "assert.h"
 #include <libqhullcpp/QhullVertexSet.h>
-
 #include <gurobi_c++.h>
-#include <iomanip>
-#include <sys/time.h>
-#include <time.h>
+
+// #include <sys/time.h>
+// #include <time.h>
 
 namespace ICR
 {
-#define KAPPA 100000
- 
   //-------------------------------------------------------------------
   PrimitiveSearchZone::PrimitiveSearchZone(){hyperplane_ids_.clear();}
   //-------------------------------------------------------------------
@@ -129,6 +126,7 @@ namespace ICR
               }
 
 
+
 	    hyperplane_offsets_(h)=e_shift;
 	    hyperplane_normals_.row(h)=normal;
 	    // std::cout<<hyperplane_normals_.row(h)<<" "<<hyperplane_offsets_(h)<<std::endl;
@@ -139,35 +137,6 @@ namespace ICR
     else
       std::cout<<"Error in SearchZones::computeShiftedHyperplanes() - invalid Task Wrench Space type!"<<std::endl;
   }
-  //  //-------------------------------------------------------------------
-  // void SearchZones::extractPhList(std::vector<Eigen::MatrixXd*>& Ph_list)const
-  // {
-  //   //Ph_list stores, for each of the h facets of the prototype GWS's convex hull, the vertices spanning the h-th facet
-
-  //   uint H=grasp_->getGWS()->getNumFacets();
-  //   uint K=grasp_->getGWS()->getDimension();
-
-  //   Ph_list.resize(H);
-
-  //   facetT* curr_f=grasp_->getGWS()->getConvexHull()->beginFacet().getFacetT();
-  //   for (uint h=0; h<H; h++)
-  //     {
-  // 	setT* vertices=curr_f->vertices;
-  // 	uint V=(uint)qh_setsize(vertices);
-  // 	Eigen::MatrixXd* Ph(new  Eigen::MatrixXd(K,V));
-
-  // 	//put the vertices of the current facet in the columns of the matrix Ph
-  // 	for(uint v=0;v<V ;v++)
-  // 	  {
-  // 	    coordT* p =((vertexT*)vertices->e[v].p)->point;
-  //           for (uint k=0;k<K;k++) //Really shouldn't be doint that in a loop...
-  // 	      (*Ph)(k,v)=p[k];
-  // 	  }
-
-  // 	Ph_list[h]=Ph;
-  // 	curr_f=curr_f->next;
-  //     }
-  // }
   //-------------------------------------------------------------------
   void SearchZones::mapFacetToFingers(const orgQhull::QhullFacet& facet,IndexList & finger_ids)const
   {
@@ -186,84 +155,6 @@ namespace ICR
   	    }
       }
   }
-  //-------------------------------------------------------------------
-  // void SearchZones::extractWhiList(std::vector< ContactRegion * > const & conditioning_patches,std::vector<std::vector<Eigen::MatrixXd*> >& Wh_i_list)const
-  // {
-  //   //Wh_i_list stores, for each of the h facets of the prototype GWS's convex hull, the wrench cones of the conditioning patches belonging to those fingers of the prototype grasp whose wrenches span the h-th facet
-
-  //   uint H=grasp_->getGWS()->num_facets_;
-  //   Wh_i_list.resize(H);
-  //   IndexList finger_ids;
-  //   orgQhull::QhullFacet facet=grasp_->getGWS()->conv_hull_.beginFacet();
-
-  //   for (uint h=0; h<H; h++)
-  //     {
-  // 	mapFacetToFinger(facet,finger_ids);
-  // 	std::vector<Eigen::MatrixXd*> Wh_i;
-  // 	for (IndexList::const_iterator f_it = finger_ids.begin(), end = finger_ids.end(); f_it != end; ++f_it)
-  // 	  for (uint j=0; j<conditioning_patches[*f_it]->size();j++)
-  // 	    {
-  // 	      Patch* patch=conditioning_patches[*f_it]->at(j);
-  // 	      for (IndexList::const_iterator p_it = patch->patch_ids_.begin(), end = patch->patch_ids_.end(); p_it != end; ++p_it)
-  // 		Wh_i.push_back(new Eigen::MatrixXd(*(grasp_->getFinger(*f_it)->getOWS()->getWrenchCone(*p_it)->getWrenches())));
-
-  // 	    }
-
-  // 	Wh_i_list[h]=Wh_i;
-  // 	facet=facet.next();
-  //     }
-  // }
-  // //-------------------------------------------------------------------
-  // void SearchZones::computeConditionedHyperplanes(std::vector< ContactRegion * > const & conditioning_patches)
-  // {
-  //   assert(grasp_->getGWS()->convHullComputed());
-  //   uint H=grasp_->getGWS()->num_facets_;
-  //   std::vector<std::vector<Eigen::MatrixXd* > > Wh_i_list(H);
-  //   std::vector<Eigen::MatrixXd*> Ph_list(H);
-  //   CasADi::IpoptSolver nlp_solver;
-
-
-  //   struct timeval start, end;
-  //   double c_time;
-
-  //   if(tws_->getWrenchSpaceType() == Spherical)
-  //     {
-  // 	std::cout<<"Error in SearchZones::computeConditionedHyperplanes() - Spherical Task Wrench Space based search zone computation not implemented yet!"<<std::endl;
-  //     }
-  //   else if(tws_->getWrenchSpaceType() == Discrete)
-  //     {
-  // 	std::vector<Eigen::MatrixXd*> Ph_list;
-  //       extractPhList(Ph_list); //ALLOCATES MEMORY!!! Should be done with shared pointers ...
-  //       extractWhiList(conditioning_patches,Wh_i_list);//ALLOCATES MEMORY!!! Should be done with shared pointers ...
-
-  // 	createDiscreteTWSNLPSolver(Ph_list,Wh_i_list,nlp_solver);
-  // 	std::cout<<"TRYING TO SOLVE..."<<std::endl;
-  // 	gettimeofday(&start,0);
-  // 	nlp_solver.evaluate();
-
-  // 	// std::cout << std::setw(30) << "Objective: " << nlp_solver.output("f").getDescription() << std::endl;
-  // 	// std::cout << std::setw(30) << "Primal solution: " << nlp_solver.output("x").getDescription() << std::endl;
-
-  // 	gettimeofday(&end,0);
-  // 	c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
-  // 	std::cout<<"Computation time SOLVER: "<<c_time<<" s"<<std::endl;
-  // 	setTWSNLPHyperplanes(nlp_solver,Wh_i_list);
-  //     }
-  //   else
-  //     {
-  // 	std::cout<<"Error in SearchZones::computeConditionedHyperplanes() - invalid Task Wrench Space type!"<<std::endl;
-  // 	return;
-  //     }
-
-  //   //clean up
-  //   for (uint h=0; h<H; h++)
-  //     {
-  // 	for (uint i=0; i<Wh_i_list[h].size();i++)
-  // 	  delete Wh_i_list[h][i];  
-
-  //       delete Ph_list[h];
-  //     }
-  // }
   //-------------------------------------------------------------------
   void SearchZones::addPrimitiveSearchZone(uint finger_id,vertexT const* curr_vtx)
   {
@@ -391,8 +282,13 @@ namespace ICR
          
 	    if (it == finger_ids.end())
 	      {
-	    	hyperplane_offsets_(h)=e;
-	    	hyperplane_normals_.row(h)=normal;
+	       //WITH ADDITIONAL SHIFTING
+	       hyperplane_normals_.row(h)=normal;
+               double e_shift=-(normal*TW).minCoeff();
+               hyperplane_offsets_(h)=e_shift;
+               
+	       //WITHOUT ADDITIONAL SHIFTING
+	       //hyperplane_offsets_(h)=e;
 	    	continue;
 	      } 
             
@@ -500,17 +396,25 @@ namespace ICR
 	    doubleArrayToEigenMatrix(x_opt,nh_tilt);
 	    double de=1/nh_tilt.norm(); nh_tilt.normalize();
 
-	    hyperplane_offsets_(h)=x_opt[K]*de;
-	    hyperplane_normals_.row(h)=nh_tilt;
- 
+	        hyperplane_normals_.row(h)=nh_tilt;
+             	//WITH ADDITIONAL SHIFTING
+               double e_shift=-(nh_tilt*TW).minCoeff();
+               hyperplane_offsets_(h)=e_shift;
 
+	       //WITHOUT ADDITIONAL SHIFTING
+	       //hyperplane_offsets_(h)=x_opt[K]*de;
+
+ 
 	    // std::cout<<"solution: "<<hyperplane_normals_.row(h)<<" "<<hyperplane_offsets_(h)<<std::endl;
 	    // std::cout<<"x_opt: ";
 	    // for (uint j=0;j<K+1; j++)
 	    //   std::cout<<x_opt[j]<<" ";
 	    // std::cout<<std::endl<<std::endl;
 
-	    assert(hyperplane_offsets_(h) > 0); //just to be sure ...           
+ 	   
+
+
+	    assert(hyperplane_offsets_(h) >= 0); //just to be sure ...           
 	    curr_f=curr_f.next();
 
  	    //clean-up
@@ -531,26 +435,6 @@ namespace ICR
       std::cout<<"Error in SearchZones::computeShiftedHyperplanes() - invalid Task Wrench Space type!"<<std::endl;
       
   } 
-  //--------------------------------------------------------------------
-  // void SearchZones::computeConditionedSearchZones(std::vector< ContactRegion * > const & conditioning_patches)
-  // {
-  //   //Make sure the TWS is valid
-  //   assert(tws_.get() != NULL);
-  //   assert(tws_->getDimension() == grasp_->getGWS()->getDimension());
-  //   assert(grasp_->getGWS()->getOcInsphereRadius() >= tws_->getOcInsphereRadius());
-
-  //   //Make sure the grasp is valid
-  //   assert(grasp_->getGWS()->containsOrigin());
-
-  //   //Make sure the conditioning patches are valid
-  //   assert(conditioning_patches.size()==grasp_->getNumFingers());
-
-  //   initializeSearchZones();
-  //   computeConditionedHyperplanes(conditioning_patches);
-  //   computePrimitiveSearchZones();
- 
-  //   search_zones_computed_=true;
-  // }
   //--------------------------------------------------------------------
   void SearchZones::computePrimitiveSearchZones()
   { 
