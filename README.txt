@@ -11,13 +11,15 @@ Configuration
 
 A number of parameters can be set in the file /icrcpp/include/config.h prior to compilation. By default, the ICR-computation is multithreaded in the number of fingers. For single-core processors the computation is faster when threading is disabled by uncommenting the line #define MULTITHREAD_ICR_COMPUTATION. In the same file, the default finger parameters can be changed. If DIVIDE_OWS_BY_LAMBDA is defined, the wrenches of the Object Wrench Space are divided by the largest occuring torque arm, which grants scale invariance. In /icrcpp/include/debug.h defining following statements writes text files in the icrcpp/debug directory.
 
-DEBUG_OBJECT_LOADER writes the vertices and vertex-normals of the loaded object to 'points.txt' and 'normals.txt' respectively. The neighbor indices of each point are written to 'neighbors.txt'.
+DEBUG_OBJECT_LOADER writes the vertices and vertex-normals of the loaded object to '/debug/points.txt' and '/debug/normals.txt' respectively. The neighbor indices of each point are written to 'neighbors.txt'.
 
-DEBUG_OWS writes the genereated wrench cones to 'wrenches.txt'. Note that if multiple different Object Wrench Spaces exist due to differing finger contact models, only the last one gets written.
+DEBUG_OWS writes the genereated wrench cones to '/debug/wrenches.txt'. Note that if multiple different Object Wrench Spaces exist due to differing finger contact models, only the last one gets written.
 
-DEBUG_DISCRETEWRENCHSPACE The hyperplanes describing the convex hull of the Grasp Wrench Space are written to 'hyperplanes.txt'. 
+DEBUG_DISCRETEWRENCHSPACE The hyperplanes describing the convex hull of the Grasp Wrench Space are written to '/debug/hyperplanes.txt'. 
 
 DEBUG_QHULL If Qhull produces an error, which can happen e.g. if a prototype-grasp is not force-closure, enabling this statement results into the according Qhull error message being written to cout.
+
+DEBUG_ICR The computed icr are written to '/debug/icr.txt'
 
 Installation Instructions
 *************************
