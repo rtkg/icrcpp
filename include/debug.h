@@ -5,5 +5,6 @@
 #define DEBUG_DISCRETEWRENCHSPACE 
 //#define DEBUG_QHULL 
 #define DEBUG_OBJECT_LOADER
+#define DEBUG_ICR
 
 #endif

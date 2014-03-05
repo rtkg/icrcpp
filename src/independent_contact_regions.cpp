@@ -149,17 +149,17 @@ namespace ICR
 	//remove ineq constraint 
 	lp.remove(*ineq_constrs);
         lp.update();
-	delete ineq_constrs;
+	delete[] ineq_constrs;
 
 	// gettimeofday(&end,0);
 	// c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
 	// std::cout<<"Computation time: "<<c_time<<" s"<<std::endl;
       }
-    delete proj;
-    delete lb_x;
-    delete ones_L;
-    delete vars;
-    delete eq_constrs;
+    delete[] proj;
+    delete[] lb_x;
+    delete[] ones_L;
+    delete[] vars;
+    delete[] eq_constrs;
 
     prim_sz->satisfied_wc_ids_.conservativeResize(prim_sz->satisfied_wc_ids_.size()+1);
     prim_sz->satisfied_wc_ids_(prim_sz->satisfied_wc_ids_.size()-1)=wc->id_;
@@ -308,6 +308,19 @@ namespace ICR
         else
 	  std::cout<<"Error: Unknown ICR type - cannot compute ICR!"<<std::endl;
       }
+#endif
+
+#ifdef DEBUG_ICR //write the computed ICR
+    remove("../debug/icr.txt");
+    FILE* f=fopen ("../debug/icr.txt","a");
+    for (uint n=0; n<num_contact_regions_;n++)
+      {
+	for (uint p=0; p<contact_regions_[n]->size(); p++)
+	  fprintf(f, "% d",contact_regions_[n]->at(p)->patch_ids_.front()+1); //write the centerpoint of corresponding patch, Indexing starts from 1 opposed to 0
+
+	fprintf(f, "\n");
+      }
+    fclose (f);
 #endif
 
     icr_computed_=true;

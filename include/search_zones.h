@@ -48,15 +48,15 @@ namespace ICR
 
     //  void computeConditionedHyperplanes(std::vector< ContactRegion * > const & conditioning_patches);
     void computeShiftedHyperplanes();
+    void computePrioritizedHyperplanes(uint finger_id);
     void initializeSearchZones();
-    void addShiftedPrimitiveSearchZone(uint finger_id,vertexT const* curr_vtx);
+    void addPrimitiveSearchZone(uint finger_id,vertexT const* curr_vtx);
     void resetPrimitiveSearchZones(uint sz_id);    
     void clear();
     void computePrimitiveSearchZones();
-    //    void mapFacetToFinger(const orgQhull::QhullFacet& facet,IndexList & finger_ids)const;
+    void mapFacetToFingers(const orgQhull::QhullFacet& facet,IndexList & finger_ids)const;
     //    void extractPhList(std::vector<Eigen::MatrixXd*>& Ph_list)const;
     //    void extractWhiList(std::vector< ContactRegion * > const & conditioning_patches,std::vector<std::vector<Eigen::MatrixXd*> >& Wh_i_list)const;
-
  
     SearchZones();
 
@@ -76,6 +76,7 @@ namespace ICR
      *  tangent to a Task Wrench Space 
      */
     void computeShiftedSearchZones();
+    void computePrioritizedSearchZones(uint finger_id);
     //    void computeConditionedSearchZones(std::vector< ContactRegion * > const & conditioning_patches);
     const GraspPtr getGrasp()const;
     SearchZone const* getSearchZone(uint finger_id)const;

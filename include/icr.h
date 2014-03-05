@@ -89,7 +89,11 @@
  *
  *- Make a 'Gotcha' test to check the LP solutions are truly correct!
  *
+ *- Make a 'Gotcha' test to check the prioritized QP search zone solutions are correct
+ *
  *- Try a version of the LP-based inclusion test as one 'big' LP for all hyperplanes in a primivive search zone
+ *
+ *- Try a version of the QP-based search zone computation as one 'big' QP for all hyperplanes
  *
  */
 

@@ -217,7 +217,7 @@ namespace ICR
     assert(num_wrenches_ > dimension_);
 
     try{
-      conv_hull_.runQhull("", dimension_,num_wrenches_,wrenches_.get() ,"Qx Qt"); //Qx doesn't merge coplanar facets, Q0 does, QJ joggles
+      conv_hull_.runQhull("", dimension_,num_wrenches_,wrenches_.get() ,"Q0 Qt"); //Qx doesn't merge coplanar facets, Q0 does, QJ joggles
     }
     catch(std::exception& exc)
       {

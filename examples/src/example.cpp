@@ -16,7 +16,7 @@ int main()
   FParamList f_parameters;
   FingerParameters parameters;
   parameters.setFrictionalContact (1, 8, 0.8);
-  parameters.setWrenchIncusionTestType(Convex_Combination);
+  parameters.setWrenchIncusionTestType(Primitive);
 
   //parameters.setSoftFingerContact(1, 8, 0.8, 0.8);
   uint n_fingers=3; //number of fingers in the prototype grasp
@@ -43,18 +43,22 @@ int main()
   //  SphericalWrenchSpacePtr tws(new SphericalWrenchSpace(6,1e-5));
   //  search_zones->setTaskWrenchSpace(tws);
 
-  search_zones->computeShiftedSearchZones();
+  struct timeval start, end;
+  double c_time;
+  gettimeofday(&start,0);
+  search_zones->computePrioritizedSearchZones(0);
+  gettimeofday(&end,0);
+  c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
+  std::cout<<"Computation time search zones: "<<c_time<<" s"<<std::endl;
 
   //Create and plot the Independent Contact Regions
   IndependentContactRegions icr(search_zones,prototype_grasp);
 
-  struct timeval start, end;
-  double c_time;
   gettimeofday(&start,0);
   icr.computeICR(BFS); //explore points for inclusion via a Breadth-First Search with the prototype grasp's centerpoints as root nodes
   gettimeofday(&end,0);
   c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
-  std::cout<<"Computation time: "<<c_time<<" s"<<std::endl;
+  std::cout<<"Computation time icr: "<<c_time<<" s"<<std::endl;
 
   std::cout<<"HF: "<<icr<<std::endl;
    std::cout<<"Number of ICR points: "<<icr.getNumICRPoints()<<std::endl;
