@@ -78,24 +78,22 @@
  *- Remove the self-defined Eigen2Array and Array2Eigen functions defined in utilities.h/cpp and
  *  replace them with Eigen::Map
  *
- *- Add the option for a LP-based Inclusion Test in
- *    IndependentContactRegions::SearchZoneInclusionTest(...) use a switch in ICR::Finger to check
- *    which option to choose from and implement a new method
- *    IndependentContactRegions::primitiveSearchZoneInclusionTestLP(...) which evaluates the LP
  *
  *- Need to run qhull with the Qx option, which results in coplanar facets, otherwise there are
  *    undefined facets - should find some workaround for this to reduce the unnecessary large number
- *    of hyperplanes
+ *    of hyperplanes (edit: also the Q0 options seems to work which doesn't produce redundant planes...)
  *
  *- Implement prioritized QP search zone computation for sphericas task wrench spaces
- *
- *- Try a version of the LP-based inclusion test as one 'big' LP for all hyperplanes in a primivive search zone
  *
  *- Try a version of the QP-based search zone computation as one 'big' QP for all hyperplanes
  *
  *- Also write the loaded mesh to a file if the according debug flag is set
  *
- *- Change the Task Wrench Space constructors to accept shared pointers instead of double*
+ *- Change the Discrete Wrench Space constructors to accept shared pointers instead of double*
+ *
+ *- Still a small memory leak in
+ *    ICR::IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone*
+ *   prim_sz,WrenchCone const* wc)const - seemst to be produced by Gurobi's GRBEnv constructor
  *
  */
 

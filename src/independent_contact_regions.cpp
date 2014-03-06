@@ -99,79 +99,71 @@ namespace ICR
 
     uint L=wc->num_primitive_wrenches_;
     uint S=prim_sz->hyperplane_ids_.size();
+    Eigen::MatrixXd W=wc->cone_;
 
-    GRBEnv env;// = GRBEnv();
+
+    GRBEnv env;
     env.set(GRB_IntParam_OutputFlag,0);
     env.set(GRB_IntParam_Presolve,0);
-    //    env.set(GRB_IntParam_Method,0);
+    //env.set(GRB_IntParam_Method,0);
 
-    double* lb_x = new double[L]; std::fill_n(lb_x, L, 0); 
+    GRBModel lp(env);// = GRBModel(env);
+    GRBVar* x =lp.addVars(NULL,NULL,NULL,NULL,NULL,L*S); //LB = 0 
+    lp.update();
+
+    GRBLinExpr* lhs=new GRBLinExpr[2*S];
+    double* rhs = new double[2*S];
+    char* senses = new char[2*S];
     double* ones_L = new double[L]; std::fill_n(ones_L, L, 1); 
-    double* proj=new double[L];
-    char constrs_senses[1];
-    double one[1]; one[0]=1;
 
-    //Variables
-    GRBModel lp = GRBModel(env);
-    GRBVar* vars =lp.addVars(lb_x,NULL,NULL,NULL,NULL,L);
-    lp.update();
-
-    //Equality constraints
-    GRBLinExpr one_times_x[1]; one_times_x[0].addTerms(ones_L,vars,L);
-    constrs_senses[0]=GRB_EQUAL;
-    GRBConstr* eq_constrs = lp.addConstrs(one_times_x,constrs_senses,one,NULL,1);
-    lp.update();
-
-    Eigen::MatrixXd W=wc->cone_;
+    double* proj; 
+    double offset; 
+    Eigen::VectorXd proj_e;
     for (uint s=0;s<S; s++)
       {
-	//gettimeofday(&start,0);
+        proj_e=search_zones_->hyperplane_normals_.row(prim_sz->hyperplane_ids_[s])*W;
+    	offset=search_zones_->hyperplane_offsets_(prim_sz->hyperplane_ids_[s]);
+        eigenMatrixToDoubleArray(proj_e,proj);
 
-	//Inequality constraints
-	Eigen::VectorXd proj_e=search_zones_->hyperplane_normals_.row(prim_sz->hyperplane_ids_[s])*W;
-	double neg_offset[1]; neg_offset[0]=-search_zones_->hyperplane_offsets_(prim_sz->hyperplane_ids_[s]);
-	
-	eigenMatrixToDoubleArray(proj_e,proj);
-	GRBLinExpr proj_times_x[1]; proj_times_x[0].addTerms(proj,vars,L);
-	constrs_senses[0]=GRB_LESS_EQUAL;
-	GRBConstr* ineq_constrs = lp.addConstrs(proj_times_x,constrs_senses,neg_offset,NULL,1);
-	lp.update();
-
-	lp.optimize();
-	int status = lp.get(GRB_IntAttr_Status);
-
-	if (status != GRB_OPTIMAL) 
-	  {
-	    delete[] ineq_constrs;
-	    return false;
-	  }
-
-	//remove ineq constraint 
-	lp.remove(*ineq_constrs);
-        lp.update();
-	delete[] ineq_constrs;
-        delete[] proj;
-	// gettimeofday(&end,0);
-	// c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
-	// std::cout<<"Computation time: "<<c_time<<" s"<<std::endl;
+    	//s-th inequality constraint
+    	lhs[2*s].addTerms(proj,(x+s*L),L);
+        senses[2*s]=GRB_LESS_EQUAL;
+        rhs[2*s]=-offset;           
+      
+    	//s-th equality constriant        
+        lhs[2*s+1].addTerms(ones_L,(x+s*L),L);        
+        senses[2*s+1]=GRB_EQUAL;
+        rhs[2*s+1]=1;       
+ 
+    	delete[] proj;
       }
+    
+    GRBConstr* constrs = lp.addConstrs(lhs,senses,rhs,NULL,2*S);
+    lp.update();
+    lp.optimize();
 
-    delete[] lb_x;
+    int status = lp.get(GRB_IntAttr_Status);
+
+    delete[] x;
+    delete[] constrs;
+    delete[] lhs;
+    delete[] rhs;
+    delete[] senses;
     delete[] ones_L;
-    delete[] vars;
-    delete[] eq_constrs;
+
+    if (status != GRB_OPTIMAL) 
+      return false;
 
     prim_sz->satisfied_wc_ids_.conservativeResize(prim_sz->satisfied_wc_ids_.size()+1);
     prim_sz->satisfied_wc_ids_(prim_sz->satisfied_wc_ids_.size()-1)=wc->id_;
+      return true;
 
-    return true;
   }
   //--------------------------------------------------------------------
   bool IndependentContactRegions::primitiveSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
   {
     if ((prim_sz->satisfied_wc_ids_.array() == wc->id_).any())
       return true;
-   
 
     bool constraints_satisfied;
     for(uint pw_count=0; pw_count < wc->num_primitive_wrenches_;pw_count++)
