@@ -236,8 +236,6 @@ namespace ICR
     num_vtx_=conv_hull_.vertexCount();
     num_facets_=conv_hull_.facetCount();
 
-
-
     facetT* curr_f=conv_hull_.beginFacet().getFacetT();
     r_oc_insphere_=-(curr_f->offset);
 

@@ -260,7 +260,7 @@ namespace ICR
     else if(tws_->getWrenchSpaceType() == Discrete)
       {
 
-	GRBEnv env = GRBEnv();
+	GRBEnv env;// = GRBEnv();
 	env.set(GRB_IntParam_OutputFlag,0);
 	env.set(GRB_IntParam_Presolve,0);
        	//   env.set(GRB_IntParam_Method,2);

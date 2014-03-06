@@ -100,7 +100,7 @@ namespace ICR
     uint L=wc->num_primitive_wrenches_;
     uint S=prim_sz->hyperplane_ids_.size();
 
-    GRBEnv env = GRBEnv();
+    GRBEnv env;// = GRBEnv();
     env.set(GRB_IntParam_OutputFlag,0);
     env.set(GRB_IntParam_Presolve,0);
     //    env.set(GRB_IntParam_Method,0);
@@ -150,12 +150,12 @@ namespace ICR
 	lp.remove(*ineq_constrs);
         lp.update();
 	delete[] ineq_constrs;
-
+        delete[] proj;
 	// gettimeofday(&end,0);
 	// c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
 	// std::cout<<"Computation time: "<<c_time<<" s"<<std::endl;
       }
-    delete[] proj;
+
     delete[] lb_x;
     delete[] ones_L;
     delete[] vars;

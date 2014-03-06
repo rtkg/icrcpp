@@ -64,7 +64,7 @@ int main()
   std::cout<<"HF: "<<icr<<std::endl;
    std::cout<<"Number of ICR points: "<<icr.getNumICRPoints()<<std::endl;
 
-
+   //   delete[] a;
   //  parameters.setSoftFingerContact(1, 8, 0.8, 0.8);
   //   for (int i=0;i<n_fingers;i++)
   //     f_parameters[i]=parameters;

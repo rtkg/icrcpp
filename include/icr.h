@@ -95,7 +95,7 @@
  *
  *- Also write the loaded mesh to a file if the according debug flag is set
  *
- *- Check for memory leaks
+ *- Change the Task Wrench Space constructors to accept shared pointers instead of double*
  *
  */
 
