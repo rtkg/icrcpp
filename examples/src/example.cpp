@@ -16,7 +16,7 @@ int main()
   FParamList f_parameters;
   FingerParameters parameters;
   parameters.setFrictionalContact (1, 8, 0.8);
-  parameters.setWrenchIncusionTestType(Convex_Combination);
+  parameters.setWrenchIncusionTestType(Primitive);
 
   //parameters.setSoftFingerContact(1, 8, 0.8, 0.8);
   uint n_fingers=3; //number of fingers in the prototype grasp

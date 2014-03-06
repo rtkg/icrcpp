@@ -17,7 +17,7 @@ FN=example
 IDIR += -I ../tools/eigen-eigen-3.0.2            #include eigen headers
 IDIR += -I ../tools/Qhull-2011.2/src             #include qhull headers
 IDIR += -I ../tools/obj-1.0/build/include        #include libobj headers
-IDIR += -I /home/rkg/Software/casadi
+IDIR += -I /home/rkg/Data/Programs/gurobi562/linux64/include #Gurobi headers
 
 E_SDIR = src
 E_ODIR = obj

@@ -10,8 +10,6 @@
 #include "assert.h"
 #include <thread>
 
-#include <gurobi_c++.h>
-
 #include <sys/time.h>
 #include <time.h>
 
@@ -89,6 +87,7 @@ namespace ICR
     icr_computed_ = false;
   }
   //--------------------------------------------------------------------
+#ifdef WITH_GUROBI
   bool IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
   {
     // struct timeval start, end;
@@ -157,8 +156,8 @@ namespace ICR
     prim_sz->satisfied_wc_ids_.conservativeResize(prim_sz->satisfied_wc_ids_.size()+1);
     prim_sz->satisfied_wc_ids_(prim_sz->satisfied_wc_ids_.size()-1)=wc->id_;
       return true;
-
   }
+#endif
   //--------------------------------------------------------------------
   bool IndependentContactRegions::primitiveSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
   {
@@ -205,7 +204,14 @@ namespace ICR
 	    if(wrench_inclusion_test_type==Primitive)
               psz_satisfied=primitiveSearchZoneInclusionTest((*search_zones_->search_zones_[region_id])[psz_id] ,grasp_->getFinger(region_id)->getOWS()->getWrenchCone(*patch_point));
             else if(wrench_inclusion_test_type==Convex_Combination)
+	      {
+#ifdef WITH_GUROBI
 	      psz_satisfied=convexCombinationSearchZoneInclusionTest((*search_zones_->search_zones_[region_id])[psz_id] ,grasp_->getFinger(region_id)->getOWS()->getWrenchCone(*patch_point));
+#else
+              std::cout<<"Error in IndependentContactRegions::searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type), icrcpp was not compiled with Gurobi-support. ICR::WrenchInclusionTestType::Convex_Combination is not supported. Exiting ..."<<std::endl;
+              exit(0);
+#endif
+	      }
             else 
 	      {
 		std::cout<<"Error in IndependentContactRegions::searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type) - invalid wrench inclusion test type specified! Exiting ..."<<std::endl;

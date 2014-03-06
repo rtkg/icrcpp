@@ -5,6 +5,11 @@
 #include "utilities.h"
 #include "ows.h"
 #include <libqhullcpp/Qhull.h>
+#include "config.h"
+
+#ifdef WITH_GUROBI
+#include <gurobi_c++.h>
+#endif
 
 namespace ICR
 {
@@ -46,18 +51,18 @@ namespace ICR
     Eigen::Matrix<double,Eigen::Dynamic,6> hyperplane_normals_;
     Eigen::VectorXd hyperplane_offsets_;  
 
-    //  void computeConditionedHyperplanes(std::vector< ContactRegion * > const & conditioning_patches);
     void computeShiftedHyperplanes();
-    void computePrioritizedHyperplanes(uint finger_id);
     void initializeSearchZones();
     void addPrimitiveSearchZone(uint finger_id,vertexT const* curr_vtx);
     void resetPrimitiveSearchZones(uint sz_id);    
     void clear();
     void computePrimitiveSearchZones();
     void mapFacetToFingers(const orgQhull::QhullFacet& facet,IndexList & finger_ids)const;
-    //    void extractPhList(std::vector<Eigen::MatrixXd*>& Ph_list)const;
-    //    void extractWhiList(std::vector< ContactRegion * > const & conditioning_patches,std::vector<std::vector<Eigen::MatrixXd*> >& Wh_i_list)const;
- 
+
+#ifdef WITH_GUROBI
+  void computePrioritizedHyperplanes(uint finger_id);
+#endif
+
     SearchZones();
 
   public:
@@ -76,8 +81,6 @@ namespace ICR
      *  tangent to a Task Wrench Space 
      */
     void computeShiftedSearchZones();
-    void computePrioritizedSearchZones(uint finger_id);
-    //    void computeConditionedSearchZones(std::vector< ContactRegion * > const & conditioning_patches);
     const GraspPtr getGrasp()const;
     SearchZone const* getSearchZone(uint finger_id)const;
     uint getNumSearchZones()const;
@@ -95,6 +98,10 @@ namespace ICR
     Eigen::Matrix<double,Eigen::Dynamic,6> const* getHyperplaneNormals()const;
     Eigen::VectorXd const*getHyperplaneOffsets()const;
     WrenchSpacePtr getTaskWrenchSpace()const;
+
+#ifdef WITH_GUROBI
+    void computePrioritizedSearchZones(uint finger_id);
+#endif
   };
   //-------------------------------------------------------------------
 }//namespace ICR

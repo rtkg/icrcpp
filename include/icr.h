@@ -85,7 +85,7 @@
  *
  *- Implement prioritized QP search zone computation for sphericas task wrench spaces
  *
- *- Try a version of the QP-based search zone computation as one 'big' QP for all hyperplanes
+ *- Try a version of the QP-based search zone computation as one 'big' QP for all hyperplanes - should be faster
  *
  *- Also write the loaded mesh to a file if the according debug flag is set
  *

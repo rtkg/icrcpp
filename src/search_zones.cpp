@@ -3,7 +3,6 @@
 #include "../include/grasp.h"
 #include "assert.h"
 #include <libqhullcpp/QhullVertexSet.h>
-#include <gurobi_c++.h>
 
 // #include <sys/time.h>
 // #include <time.h>
@@ -125,14 +124,11 @@ namespace ICR
 		exit(0);
               }
 
-
-
 	    hyperplane_offsets_(h)=e_shift;
 	    hyperplane_normals_.row(h)=normal;
 	    // std::cout<<hyperplane_normals_.row(h)<<" "<<hyperplane_offsets_(h)<<std::endl;
 	    curr_f=curr_f->next;
           }
-
       }
     else
       std::cout<<"Error in SearchZones::computeShiftedHyperplanes() - invalid Task Wrench Space type!"<<std::endl;
@@ -227,6 +223,7 @@ namespace ICR
     search_zones_computed_=true;
   }
   //--------------------------------------------------------------------
+#ifdef WITH_GUROBI
   void SearchZones::computePrioritizedSearchZones(uint finger_id)
   {
     //Make sure the TWS is valid
@@ -259,8 +256,7 @@ namespace ICR
       }
     else if(tws_->getWrenchSpaceType() == Discrete)
       {
-
-	GRBEnv env;// = GRBEnv();
+	GRBEnv env;
 	env.set(GRB_IntParam_OutputFlag,0);
 	env.set(GRB_IntParam_Presolve,0);
        	//   env.set(GRB_IntParam_Method,2);
@@ -282,13 +278,13 @@ namespace ICR
          
 	    if (it == finger_ids.end())
 	      {
-	       //WITH ADDITIONAL SHIFTING
-	       hyperplane_normals_.row(h)=normal;
-               double e_shift=-(normal*TW).minCoeff();
-               hyperplane_offsets_(h)=e_shift;
+		//WITH ADDITIONAL SHIFTING
+		hyperplane_normals_.row(h)=normal;
+		double e_shift=-(normal*TW).minCoeff();
+		hyperplane_offsets_(h)=e_shift;
                
-	       //WITHOUT ADDITIONAL SHIFTING
-	       //hyperplane_offsets_(h)=e;
+		//WITHOUT ADDITIONAL SHIFTING
+		//hyperplane_offsets_(h)=e;
 	    	continue;
 	      } 
             
@@ -396,23 +392,19 @@ namespace ICR
 	    doubleArrayToEigenMatrix(x_opt,nh_tilt);
 	    double de=1/nh_tilt.norm(); nh_tilt.normalize();
 
-	        hyperplane_normals_.row(h)=nh_tilt;
-             	//WITH ADDITIONAL SHIFTING
-               double e_shift=-(nh_tilt*TW).minCoeff();
-               hyperplane_offsets_(h)=e_shift;
+	    hyperplane_normals_.row(h)=nh_tilt;
+	    //WITH ADDITIONAL SHIFTING
+	    double e_shift=-(nh_tilt*TW).minCoeff();
+	    hyperplane_offsets_(h)=e_shift;
 
-	       //WITHOUT ADDITIONAL SHIFTING
-	       //hyperplane_offsets_(h)=x_opt[K]*de;
+	    //WITHOUT ADDITIONAL SHIFTING
+	    //hyperplane_offsets_(h)=x_opt[K]*de;
 
- 
 	    // std::cout<<"solution: "<<hyperplane_normals_.row(h)<<" "<<hyperplane_offsets_(h)<<std::endl;
 	    // std::cout<<"x_opt: ";
 	    // for (uint j=0;j<K+1; j++)
 	    //   std::cout<<x_opt[j]<<" ";
 	    // std::cout<<std::endl<<std::endl;
-
- 	   
-
 
 	    assert(hyperplane_offsets_(h) >= 0); //just to be sure ...           
 	    curr_f=curr_f.next();
@@ -435,6 +427,7 @@ namespace ICR
       std::cout<<"Error in SearchZones::computeShiftedHyperplanes() - invalid Task Wrench Space type!"<<std::endl;
       
   } 
+#endif
   //--------------------------------------------------------------------
   void SearchZones::computePrimitiveSearchZones()
   { 

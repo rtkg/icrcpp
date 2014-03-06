@@ -22,5 +22,5 @@
 #define DIVIDE_OWS_BY_LAMBDA                    
 
 //#define MULTITHREAD_ICR_COMPUTATION                 
-
+//#define WITH_GUROBI
 #endif
