@@ -17,7 +17,9 @@ int main()
   FingerParameters parameters;
   parameters.setFrictionalContact (1, 8, 0.8);
   parameters.setWrenchIncusionTestType(Primitive);
-
+  parameters.setContactModelType(Multi_Point); 
+  parameters.setInclusionRuleType(Sphere);
+  parameters.setInclusionRuleParameter(10);
   //parameters.setSoftFingerContact(1, 8, 0.8, 0.8);
   uint n_fingers=3; //number of fingers in the prototype grasp
   for (int i=0;i<n_fingers;i++)

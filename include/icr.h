@@ -95,6 +95,8 @@
  *    ICR::IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone*
  *   prim_sz,WrenchCone const* wc)const - seemst to be produced by Gurobi's GRBEnv constructor
  *
+ *- Add a filter method to the ICR::IndependentContactRegions class to remove duplicated points from regions 
+ *
  */
 
 #include "utilities.h"
