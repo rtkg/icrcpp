@@ -99,7 +99,7 @@ void LimitSurface::addHardFingerWrenches()
 
  //add the wrench corresponding to the center force along the normal -> advantageous for the primitive-wrench based inclusion test
   Eigen::Matrix< double, 6, Eigen::Dynamic > normal_wrench=Eigen::Matrix< double, 6, Eigen::Dynamic >::Zero(6,1);
-  normal_wrench(2)=force_magnitude_*cos(alpha);
+  normal_wrench(2)=force_magnitude_;//*cos(alpha);
   local_cone_.addWrenches(normal_wrench);
 
   //add the primitive wrenches corresponding to the edges of the discretized friction cone
@@ -119,14 +119,14 @@ void LimitSurface::addHardFingerWrenches()
 //--------------------------------------------------------------------
 void LimitSurface::addSoftFingerWrenches()
 {
-  double alpha=atan(mu_0_); //opening-angle of the friction cone
+  //double alpha=atan(mu_0_); //opening-angle of the friction cone
 
    Eigen::Matrix<double,4,2> gen_forces=Eigen::Matrix<double,4,2>::Zero(4,2);
   
-   gen_forces(2,0)=force_magnitude_*cos(alpha);
-   gen_forces(2,1)=force_magnitude_*cos(alpha);
-   gen_forces(3,0)=mu_T_*force_magnitude_*cos(alpha);
-   gen_forces(3,1)=-mu_T_*force_magnitude_*cos(alpha);
+   gen_forces(2,0)=force_magnitude_;//*cos(alpha);
+   gen_forces(2,1)=force_magnitude_*;//cos(alpha);
+   gen_forces(3,0)=mu_T_*force_magnitude_;//*cos(alpha);
+   gen_forces(3,1)=-mu_T_*force_magnitude_;//*cos(alpha);
    local_cone_.addWrenches(selection_matrix_*gen_forces);
 
 }
