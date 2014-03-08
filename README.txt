@@ -35,8 +35,17 @@ icrcpp: Published on git@github.com:rtkg/icrcpp.git, tarball available from http
 For more information and clean-up, see the Readme-files of the aforementioned packages. the /build/lib directories of Qhull-2011.2 and obj-1.0 need to be included in the LD_LIBRARY_PATH. In case of different installation directories, The include statements in the /icrcpp/Makefile need to be changed accordingly.
 
 
+Object files
+************
+The objects have to comprise the same number of vertices and vertex normals, i.e., each vertex has to correspond to exactly one vertex normal.
 
+A valid facet definition in the .obj file looks like this:
+f 1713//1713 1714//1714 1685//1685
 
+Opposed to an invalid one:
+f 1713//1623 1714//1599 1685//1200
+
+To generate .obj files in Meshlab carry out following filtering steps: remove unreferenced vertex, remove duplicated vertex, recompute vertex normals and normalize vertex normals. Save with only the 'Normals' box ticked.
 
 
 

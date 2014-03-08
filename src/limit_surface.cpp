@@ -124,7 +124,7 @@ void LimitSurface::addSoftFingerWrenches()
    Eigen::Matrix<double,4,2> gen_forces=Eigen::Matrix<double,4,2>::Zero(4,2);
   
    gen_forces(2,0)=force_magnitude_;//*cos(alpha);
-   gen_forces(2,1)=force_magnitude_*;//cos(alpha);
+   gen_forces(2,1)=force_magnitude_;//cos(alpha);
    gen_forces(3,0)=mu_T_*force_magnitude_;//*cos(alpha);
    gen_forces(3,1)=-mu_T_*force_magnitude_;//*cos(alpha);
    local_cone_.addWrenches(selection_matrix_*gen_forces);

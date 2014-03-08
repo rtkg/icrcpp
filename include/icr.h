@@ -97,6 +97,7 @@
  *
  *- Add a filter method to the ICR::IndependentContactRegions class to remove duplicated points from regions 
  *
+ *- Object parser always returns false ...?
  */
 
 #include "utilities.h"

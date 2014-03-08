@@ -9,7 +9,7 @@ int main()
 { 
   //Load a new target object 
   ObjectLoader obj_loader;
-  obj_loader.loadObject("../models/beer_can.obj","beer_can");
+  obj_loader.loadObject("../models/Fish_5k.obj","beer_can");
  
   //Create a list of default finger parameters (default parameters defined in config.h) and a 
   //vector of centerpoint contact id's for the 
@@ -17,7 +17,7 @@ int main()
   FingerParameters parameters;
   parameters.setFrictionalContact (1, 8, 0.8);
   parameters.setWrenchIncusionTestType(Primitive);
-  parameters.setContactModelType(Multi_Point); 
+  parameters.setContactModelType(Single_Point); 
   parameters.setInclusionRuleType(Sphere);
   parameters.setInclusionRuleParameter(10);
   //parameters.setSoftFingerContact(1, 8, 0.8, 0.8);
@@ -26,9 +26,9 @@ int main()
     f_parameters.push_back(parameters);
   
   VectorXui centerpoint_ids(n_fingers);
-  //centerpoint_ids=generateRandomGrasp(obj_loader.getObject(),f_parameters);
+  centerpoint_ids=generateRandomGrasp(obj_loader.getObject(),f_parameters);
   //centerpoint_ids << 2036, 4508;  //centerpoint_ids<<346, 3131, 6168;// centerpoint_ids << 1838, 4526, 4362, 1083, 793; centerpoint_ids << 2036, 4508;
-  centerpoint_ids<<346, 3131, 6168;
+  //centerpoint_ids<<346, 3131, 6168;
 
   //Create a prototype grasp and search zones, the parameter alpha is the scale of the largest
   //origin-centered ball contained by the Grasp wrench space of the prototype grasp
