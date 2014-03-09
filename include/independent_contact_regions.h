@@ -76,7 +76,9 @@ class IndependentContactRegions
   /** \brief Sets new grasp for this icr. Clears previously calculated
    *   regions.
    */
- void setGrasp(GraspPtr g_in); };
+ void setGrasp(GraspPtr g_in); 
+ bool writeICR(const std::string& filepath)const;
+};
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------
 }//;namespace ICR

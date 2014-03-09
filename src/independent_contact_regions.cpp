@@ -308,9 +308,29 @@ namespace ICR
       }
 #endif
 
-#ifdef DEBUG_ICR //write the computed ICR
-    remove("../debug/icr.txt");
-    FILE* f=fopen ("../debug/icr.txt","a");
+
+
+    icr_computed_=true;
+  }
+  //--------------------------------------------------------------------
+  bool IndependentContactRegions::writeICR(const std::string& filepath)const
+  {
+ //write the computed ICR
+    if (!icr_computed_)
+      {
+	std::cout<<"Error in bool IndependentContactRegions::writeICR(const std::string& filepath)const - No ICR computed, cannot write to file"<<std::endl;
+	return false;
+        }
+
+    remove(filepath.c_str());
+    FILE* f=fopen (filepath.c_str(),"a");
+
+    if(f==NULL)
+      {
+	std::cout<<"Error in bool IndependentContactRegions::writeICR(const std::string& filepath)const - Could not open file "<<filepath<<". Exiting ..."<<std::endl;
+	exit(0);
+      }
+
     for (uint n=0; n<num_contact_regions_;n++)
       {
 	for (uint p=0; p<contact_regions_[n]->size(); p++)
@@ -319,9 +339,6 @@ namespace ICR
 	fprintf(f, "\n");
       }
     fclose (f);
-#endif
-
-    icr_computed_=true;
   }
   //--------------------------------------------------------------------
   bool IndependentContactRegions::icrComputed()const{return icr_computed_;}

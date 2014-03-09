@@ -19,8 +19,6 @@ DEBUG_DISCRETEWRENCHSPACE The hyperplanes describing the convex hull of the Gras
 
 DEBUG_QHULL If Qhull produces an error, which can happen e.g. if a prototype-grasp is not force-closure, enabling this statement results into the according Qhull error message being written to cout.
 
-DEBUG_ICR The computed icr are written to '/debug/icr.txt'
-
 Installation Instructions
 *************************
 Easiest way to install is via the install.sh bash script in the root folder which installs the following libraries locally (in the root folder, git submodule init and git submodule update need to be run before, in order to clone the auxiliary libraries):
