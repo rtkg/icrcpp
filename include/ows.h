@@ -49,6 +49,7 @@ class OWS
   LimitSurface const* getLimitSurface() const; 
   void scale(double scale);
   void divideByLambda();  
+  double getLambda()const;
   std::string getParentObjectName()const;
 };
 //--------------------------------------------------------------------

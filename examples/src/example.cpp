@@ -26,9 +26,13 @@ int main()
     f_parameters.push_back(parameters);
   
   VectorXui centerpoint_ids(n_fingers);
-  centerpoint_ids=generateRandomGrasp(obj_loader.getObject(),f_parameters);
+
+    WrenchSpacePtr tws(new SphericalWrenchSpace(6,1e-5));
+
+    centerpoint_ids=generateRandomGrasp(obj_loader.getObject(),f_parameters,tws);
   //centerpoint_ids << 2036, 4508;  //centerpoint_ids<<346, 3131, 6168;// centerpoint_ids << 1838, 4526, 4362, 1083, 793; centerpoint_ids << 2036, 4508;
   //centerpoint_ids<<346, 3131, 6168;
+
 
   //Create a prototype grasp and search zones, the parameter alpha is the scale of the largest
   //origin-centered ball contained by the Grasp wrench space of the prototype grasp
@@ -36,14 +40,13 @@ int main()
   prototype_grasp->init(f_parameters,obj_loader.getObject(),centerpoint_ids);
   SearchZonesPtr search_zones(new SearchZones(prototype_grasp));
 
-  //  Create a new Discrete Task Wrench Space
-  double *a=new double[6]; std::fill_n(a, 6, 0); 
+  // //  Create a new Discrete Task Wrench Space
+  // double *a=new double[6]; std::fill_n(a, 6, 0); 
+  // SharedDoublePtr t_wrenches(a); 
+  // DiscreteTaskWrenchSpacePtr tws(new DiscreteTaskWrenchSpace(6,t_wrenches,1));  // 	DiscreteTaskWrenchSpace (uint dimension, SharedDoublePtr wrenches, uint num_wrenches)
+  // search_zones->setTaskWrenchSpace(tws);
 
-  SharedDoublePtr t_wrenches(a); 
-  DiscreteTaskWrenchSpacePtr tws(new DiscreteTaskWrenchSpace(6,t_wrenches,1));  // 	DiscreteTaskWrenchSpace (uint dimension, SharedDoublePtr wrenches, uint num_wrenches)
-  search_zones->setTaskWrenchSpace(tws);
-  //  SphericalWrenchSpacePtr tws(new SphericalWrenchSpace(6,1e-5));
-  //  search_zones->setTaskWrenchSpace(tws);
+   search_zones->setTaskWrenchSpace(tws);
 
   struct timeval start, end;
   double c_time;

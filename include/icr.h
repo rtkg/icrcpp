@@ -98,6 +98,10 @@
  *- Add a filter method to the ICR::IndependentContactRegions class to remove duplicated points from regions 
  *
  *- Object parser always returns false ...?
+ *
+ *- Should make sure that the given TWS contains the origin in  VectorXui generateRandomGrasp(TargetObjectPtr object,const FParamList f_parameters, WrenchSpacePtr const tws) 
+ *
+ *- Should add a public method to allow dividing the OWS by lambda not only via a preprocessor flag
  */
 
 #include "utilities.h"

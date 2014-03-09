@@ -313,7 +313,7 @@ namespace ICR
     icr_computed_=true;
   }
   //--------------------------------------------------------------------
-  bool IndependentContactRegions::writeICR(const std::string& filepath)const
+  bool IndependentContactRegions::writeICR(const std::string& filepath, const char* mode)const
   {
  //write the computed ICR
     if (!icr_computed_)
@@ -322,8 +322,7 @@ namespace ICR
 	return false;
         }
 
-    remove(filepath.c_str());
-    FILE* f=fopen (filepath.c_str(),"a");
+    FILE* f=fopen (filepath.c_str(),mode);
 
     if(f==NULL)
       {

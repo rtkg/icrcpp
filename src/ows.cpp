@@ -152,5 +152,11 @@ void OWS::divideByLambda()
 //--------------------------------------------------------------------
 std::string OWS::getParentObjectName()const{return parent_obj_name_;}
 //--------------------------------------------------------------------
+  double OWS::getLambda()const
+  {
+    assert(initialized_);
+
+    return lambda_;
+}
 //--------------------------------------------------------------------
 }//namespace ICR

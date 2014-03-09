@@ -77,7 +77,7 @@ class IndependentContactRegions
    *   regions.
    */
  void setGrasp(GraspPtr g_in); 
- bool writeICR(const std::string& filepath)const;
+ bool writeICR(const std::string& filepath,const char* mode="a")const;
 };
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------

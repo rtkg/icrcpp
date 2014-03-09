@@ -90,7 +90,7 @@ uint dfactorial(uint x);
 /*!
  * Column-wise conversion from an Eigen::MatrixXd to a double array. Allocates Memory for the array!!! 
  */
- void eigenMatrixToDoubleArray(Eigen::MatrixXd const & matrix, double* & array);
+ void eigenMatrixToDoubleArray(Eigen::MatrixXd const & matrix, double*& array);
 //--------------------------------------------------------------------
 /*!
  * Column-wise conversion from a double array to an Eigen::MatrixXd
