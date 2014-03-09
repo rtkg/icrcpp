@@ -26,6 +26,8 @@ class TargetObject
   std::string name_;
   uint num_cp_;
   ContactPointList contact_points_;
+  Vector3dPtr centroid_;
+  bool centroid_computed_;
   
   //  uint findClosestIdxCore(double x, double y, double z);
 
@@ -44,6 +46,8 @@ class TargetObject
   void setName(std::string const& name);
   uint getNumCp() const;
   void reserveCpList(uint num_cp);
+  void computeCentroid();
+  Vector3dPtr getCentroid()const;
   //  uint findClosestIdx(double x, double y, double z);
   //  uint findClosestIdx(Eigen::Vector3d& pt);
   void addContactPoint(ContactPoint const& point);
