@@ -106,6 +106,8 @@
  *- Wrench space inclusion test type should be set in the ICR::IndependentContactRegions class, not via finger parameters in the fingers
  *
  *- Pinpoint the cause of the sporadic Gurobi exceptions in IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
+ *
+ *- Add a flipNormals() method to the ICR::TargetObject class to invert vertex normal directions
  */
 
 #include "utilities.h"

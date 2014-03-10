@@ -36,7 +36,7 @@ int main()
   uint nF=4;
   double g_scale=0.1; //scale used for gravity
   Eigen::VectorXd mu(3); mu<<0.2,0.5,0.8;
-  Eigen::VectorXd L(3); L<<5,7,9;   //consider that one wrench will be added (corresponding to the normal force)
+  Eigen::VectorXd L(3); L<<6,8,10;   //consider that one wrench will be added (corresponding to the normal force)
 
   //LOAD TARGET OBJECT
   ObjectLoader obj_loader;
@@ -88,8 +88,9 @@ int main()
      
 	  //COMPUTE ICR WITH PRIMITIVE WRENCH INCLUSION
 	  GraspPtr prototype_grasp(new Grasp());
-	  gettimeofday(&start,0);
 	  prototype_grasp->init(f_parameters,obj,G);
+	  gettimeofday(&start,0);
+          prototype_grasp->setCenterPointIds(G);
 	  SearchZonesPtr search_zones(new SearchZones(prototype_grasp));
 	  search_zones->setTaskWrenchSpace(tws);
 	  search_zones->computeShiftedSearchZones();

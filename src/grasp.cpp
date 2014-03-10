@@ -169,7 +169,9 @@ namespace ICR
   //------------------------------------------------------------------
   void Grasp::setCenterPointId(uint finger_id,uint centerpoint_id)
   {
-    //Not tested yet!! Changing the center contact point requires updating the number of grasp wrenches (the number of patch points might differ between old and new center point) and recomputing the GWS
+    //Not tested yet!! Changing the center contact point requires updating the number of grasp
+    //wrenches (the number of patch points might differ between old and new center point) and
+    //recomputing the GWS
     assert(initialized_);
     assert(centerpoint_id <= obj_->getNumCp()-1);
     num_grasp_wrenches_-=(fingers_.at(finger_id)->getCenterPointPatch()->patch_ids_.size())*(fingers_.at(finger_id)->getContactModel()->getLimitSurface()->getNumPrimitiveWrenches());

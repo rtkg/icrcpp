@@ -102,20 +102,21 @@ namespace ICR
 	uint S=prim_sz->hyperplane_ids_.size();
 	Eigen::MatrixXd W=wc->cone_;
 
-
 	GRBEnv env;
 	env.set(GRB_IntParam_OutputFlag,0);
 	env.set(GRB_IntParam_Presolve,0);
 	//env.set(GRB_IntParam_Method,0);
 
 	GRBModel lp(env);// = GRBModel(env);
-	GRBVar* x =lp.addVars(NULL,NULL,NULL,NULL,NULL,L*S); //LB = 0 
+        double* obj = new double[L+1]; std::fill_n(obj, L, 0); obj[L]=1; //only minimize slack variable z 
+	GRBVar* x =lp.addVars(NULL,NULL,obj,NULL,NULL,L+1); //LB = 0 
 	lp.update();
 
-	GRBLinExpr* lhs=new GRBLinExpr[2*S];
-	double* rhs = new double[2*S];
-	char* senses = new char[2*S];
+	GRBLinExpr* lhs=new GRBLinExpr[S+1];
+	double* rhs = new double[S+1];
+	char* senses = new char[S+1];
 	double* ones_L = new double[L]; std::fill_n(ones_L, L, 1); 
+        double minus_one[1]; minus_one[0]=-1;        
 
 	double* proj; 
 	double offset; 
@@ -125,25 +126,26 @@ namespace ICR
 	    proj_e=search_zones_->hyperplane_normals_.row(prim_sz->hyperplane_ids_[s])*W;
 	    offset=search_zones_->hyperplane_offsets_(prim_sz->hyperplane_ids_[s]);
 	    eigenMatrixToDoubleArray(proj_e,proj);
-
+           
 	    //s-th inequality constraint
-	    lhs[2*s].addTerms(proj,(x+s*L),L);
-	    senses[2*s]=GRB_LESS_EQUAL;
-	    rhs[2*s]=-offset;           
-      
-	    //s-th equality constriant        
-	    lhs[2*s+1].addTerms(ones_L,(x+s*L),L);        
-	    senses[2*s+1]=GRB_EQUAL;
-	    rhs[2*s+1]=1;       
- 
+            lhs[s].addTerms(proj,x,L);
+            lhs[s].addTerms(minus_one,(x+L),1);
+            senses[s]=GRB_LESS_EQUAL;
+            rhs[s]=-offset;         
+      	 
 	    delete[] proj;
 	  }
-    
-	GRBConstr* constrs = lp.addConstrs(lhs,senses,rhs,NULL,2*S);
-	lp.update();
-        lp.optimize();
 
-	int status = lp.get(GRB_IntAttr_Status);
+	//equality constriant        
+	lhs[S].addTerms(ones_L,x,L);        
+	senses[S]=GRB_EQUAL;
+	rhs[S]=1;      
+    
+	GRBConstr* constrs = lp.addConstrs(lhs,senses,rhs,NULL,S+1);
+	lp.update();
+        lp.optimize(); 
+
+	double z=x[L].get(GRB_DoubleAttr_X); 
 
 	delete[] x;
 	delete[] constrs;
@@ -151,9 +153,10 @@ namespace ICR
 	delete[] rhs;
 	delete[] senses;
 	delete[] ones_L;
+        delete[] obj;
 
-	if (status != GRB_OPTIMAL) 
-	  return false;
+	if (z > 1e-15)
+          return false;
 
 	prim_sz->satisfied_wc_ids_.conservativeResize(prim_sz->satisfied_wc_ids_.size()+1);
 	prim_sz->satisfied_wc_ids_(prim_sz->satisfied_wc_ids_.size()-1)=wc->id_;
