@@ -90,72 +90,81 @@ namespace ICR
 #ifdef WITH_GUROBI
   bool IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
   {
-    // struct timeval start, end;
-    // double c_time;
-
-    if ((prim_sz->satisfied_wc_ids_.array() == wc->id_).any())
-      return true;
-
-    uint L=wc->num_primitive_wrenches_;
-    uint S=prim_sz->hyperplane_ids_.size();
-    Eigen::MatrixXd W=wc->cone_;
-
-
-    GRBEnv env;
-    env.set(GRB_IntParam_OutputFlag,0);
-    env.set(GRB_IntParam_Presolve,0);
-    //env.set(GRB_IntParam_Method,0);
-
-    GRBModel lp(env);// = GRBModel(env);
-    GRBVar* x =lp.addVars(NULL,NULL,NULL,NULL,NULL,L*S); //LB = 0 
-    lp.update();
-
-    GRBLinExpr* lhs=new GRBLinExpr[2*S];
-    double* rhs = new double[2*S];
-    char* senses = new char[2*S];
-    double* ones_L = new double[L]; std::fill_n(ones_L, L, 1); 
-
-    double* proj; 
-    double offset; 
-    Eigen::VectorXd proj_e;
-    for (uint s=0;s<S; s++)
+    try
       {
-        proj_e=search_zones_->hyperplane_normals_.row(prim_sz->hyperplane_ids_[s])*W;
-    	offset=search_zones_->hyperplane_offsets_(prim_sz->hyperplane_ids_[s]);
-        eigenMatrixToDoubleArray(proj_e,proj);
+	// struct timeval start, end;
+	// double c_time;
 
-    	//s-th inequality constraint
-    	lhs[2*s].addTerms(proj,(x+s*L),L);
-        senses[2*s]=GRB_LESS_EQUAL;
-        rhs[2*s]=-offset;           
+	if ((prim_sz->satisfied_wc_ids_.array() == wc->id_).any())
+	  return true;
+
+	uint L=wc->num_primitive_wrenches_;
+	uint S=prim_sz->hyperplane_ids_.size();
+	Eigen::MatrixXd W=wc->cone_;
+
+
+	GRBEnv env;
+	env.set(GRB_IntParam_OutputFlag,0);
+	env.set(GRB_IntParam_Presolve,0);
+	//env.set(GRB_IntParam_Method,0);
+
+	GRBModel lp(env);// = GRBModel(env);
+	GRBVar* x =lp.addVars(NULL,NULL,NULL,NULL,NULL,L*S); //LB = 0 
+	lp.update();
+
+	GRBLinExpr* lhs=new GRBLinExpr[2*S];
+	double* rhs = new double[2*S];
+	char* senses = new char[2*S];
+	double* ones_L = new double[L]; std::fill_n(ones_L, L, 1); 
+
+	double* proj; 
+	double offset; 
+	Eigen::VectorXd proj_e;
+	for (uint s=0;s<S; s++)
+	  {
+	    proj_e=search_zones_->hyperplane_normals_.row(prim_sz->hyperplane_ids_[s])*W;
+	    offset=search_zones_->hyperplane_offsets_(prim_sz->hyperplane_ids_[s]);
+	    eigenMatrixToDoubleArray(proj_e,proj);
+
+	    //s-th inequality constraint
+	    lhs[2*s].addTerms(proj,(x+s*L),L);
+	    senses[2*s]=GRB_LESS_EQUAL;
+	    rhs[2*s]=-offset;           
       
-    	//s-th equality constriant        
-        lhs[2*s+1].addTerms(ones_L,(x+s*L),L);        
-        senses[2*s+1]=GRB_EQUAL;
-        rhs[2*s+1]=1;       
+	    //s-th equality constriant        
+	    lhs[2*s+1].addTerms(ones_L,(x+s*L),L);        
+	    senses[2*s+1]=GRB_EQUAL;
+	    rhs[2*s+1]=1;       
  
-    	delete[] proj;
-      }
+	    delete[] proj;
+	  }
     
-    GRBConstr* constrs = lp.addConstrs(lhs,senses,rhs,NULL,2*S);
-    lp.update();
-    lp.optimize();
+	GRBConstr* constrs = lp.addConstrs(lhs,senses,rhs,NULL,2*S);
+	lp.update();
+        lp.optimize();
 
-    int status = lp.get(GRB_IntAttr_Status);
+	int status = lp.get(GRB_IntAttr_Status);
 
-    delete[] x;
-    delete[] constrs;
-    delete[] lhs;
-    delete[] rhs;
-    delete[] senses;
-    delete[] ones_L;
+	delete[] x;
+	delete[] constrs;
+	delete[] lhs;
+	delete[] rhs;
+	delete[] senses;
+	delete[] ones_L;
 
-    if (status != GRB_OPTIMAL) 
-      return false;
+	if (status != GRB_OPTIMAL) 
+	  return false;
 
-    prim_sz->satisfied_wc_ids_.conservativeResize(prim_sz->satisfied_wc_ids_.size()+1);
-    prim_sz->satisfied_wc_ids_(prim_sz->satisfied_wc_ids_.size()-1)=wc->id_;
-      return true;
+	prim_sz->satisfied_wc_ids_.conservativeResize(prim_sz->satisfied_wc_ids_.size()+1);
+	prim_sz->satisfied_wc_ids_(prim_sz->satisfied_wc_ids_.size()-1)=wc->id_;
+	return true;
+      }
+    catch(GRBException e) 
+      {
+	std::cout<<"Gurobi exception with error code "<<e.getErrorCode()<<" in IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const"<<std::endl;
+	std::cout<<e.getMessage()<<std::endl;
+	return false;
+      }
   }
 #endif
   //--------------------------------------------------------------------
@@ -206,10 +215,10 @@ namespace ICR
             else if(wrench_inclusion_test_type==Convex_Combination)
 	      {
 #ifdef WITH_GUROBI
-	      psz_satisfied=convexCombinationSearchZoneInclusionTest((*search_zones_->search_zones_[region_id])[psz_id] ,grasp_->getFinger(region_id)->getOWS()->getWrenchCone(*patch_point));
+		psz_satisfied=convexCombinationSearchZoneInclusionTest((*search_zones_->search_zones_[region_id])[psz_id] ,grasp_->getFinger(region_id)->getOWS()->getWrenchCone(*patch_point));
 #else
-              std::cout<<"Error in IndependentContactRegions::searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type), icrcpp was not compiled with Gurobi-support. ICR::WrenchInclusionTestType::Convex_Combination is not supported. Exiting ..."<<std::endl;
-              exit(0);
+		std::cout<<"Error in IndependentContactRegions::searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type), icrcpp was not compiled with Gurobi-support. ICR::WrenchInclusionTestType::Convex_Combination is not supported. Exiting ..."<<std::endl;
+		exit(0);
 #endif
 	      }
             else 
@@ -274,7 +283,6 @@ namespace ICR
     num_contact_regions_=search_zones_->num_search_zones_;
     contact_regions_.reserve(num_contact_regions_);
 
-  
 
 #ifdef MULTITHREAD_ICR_COMPUTATION
     std::vector<std::thread*> threads;
@@ -308,19 +316,17 @@ namespace ICR
       }
 #endif
 
-
-
     icr_computed_=true;
   }
   //--------------------------------------------------------------------
   bool IndependentContactRegions::writeICR(const std::string& filepath, const char* mode)const
   {
- //write the computed ICR
+    //write the computed ICR
     if (!icr_computed_)
       {
 	std::cout<<"Error in bool IndependentContactRegions::writeICR(const std::string& filepath)const - No ICR computed, cannot write to file"<<std::endl;
 	return false;
-        }
+      }
 
     FILE* f=fopen (filepath.c_str(),mode);
 

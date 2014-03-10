@@ -102,6 +102,10 @@
  *- Should make sure that the given TWS contains the origin in  VectorXui generateRandomGrasp(TargetObjectPtr object,const FParamList f_parameters, WrenchSpacePtr const tws) 
  *
  *- Should add a public method to allow dividing the OWS by lambda not only via a preprocessor flag
+ *
+ *- Wrench space inclusion test type should be set in the ICR::IndependentContactRegions class, not via finger parameters in the fingers
+ *
+ *- Pinpoint the cause of the sporadic Gurobi exceptions in IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
  */
 
 #include "utilities.h"

@@ -21,7 +21,7 @@
 #define DEFAULT_WRENCH_INCLUSION_TEST_TYPE          Primitive
 #define DIVIDE_OWS_BY_LAMBDA                    
 
-//#define MULTITHREAD_ICR_COMPUTATION                 
+#define MULTITHREAD_ICR_COMPUTATION                 
 #define WITH_GUROBI
 
 #endif
