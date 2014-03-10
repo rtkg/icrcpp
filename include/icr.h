@@ -108,6 +108,8 @@
  *- Pinpoint the cause of the sporadic Gurobi exceptions in IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
  *
  *- Add a flipNormals() method to the ICR::TargetObject class to invert vertex normal directions
+ *
+ *- Make the Gurobi environment a member of the ICR::IndependentContactRegions class and protect it with a mutex
  */
 
 #include "utilities.h"

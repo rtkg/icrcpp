@@ -18,17 +18,34 @@ namespace ICR
 
   IndependentContactRegions::IndependentContactRegions() :  
     icr_computed_(false),
-    num_contact_regions_(0) {contact_regions_.clear();}
+#ifdef WITH_GUROBI
+    env_(new GRBEnv),
+#endif
+    num_contact_regions_(0) 
+  {
+    contact_regions_.clear();
+#ifdef WITH_GUROBI
+    env_->set(GRB_IntParam_OutputFlag,0);
+    env_->set(GRB_IntParam_Presolve,0);
+#endif
+  }
   //--------------------------------------------------------------------
   IndependentContactRegions::IndependentContactRegions(const SearchZonesPtr search_zones,const GraspPtr grasp) : 
     search_zones_(search_zones), 
     grasp_(grasp),
     icr_computed_(false), 
+#ifdef WITH_GUROBI
+    env_(new GRBEnv),
+#endif
     num_contact_regions_(0)
   {
     contact_regions_.clear();
     assert((bool)search_zones_);
     assert((bool)grasp_);
+#ifdef WITH_GUROBI
+    env_->set(GRB_IntParam_OutputFlag,0);
+    env_->set(GRB_IntParam_Presolve,0);
+#endif
   }
   //--------------------------------------------------------------------
   IndependentContactRegions::IndependentContactRegions(IndependentContactRegions const& src) : 
@@ -36,7 +53,10 @@ namespace ICR
     grasp_(src.grasp_), 
     icr_computed_(src.icr_computed_),
     contact_regions_(src.contact_regions_),
-    num_contact_regions_(src.num_contact_regions_){}
+#ifdef WITH_GUROBI
+    env_(src.env_),
+#endif
+  num_contact_regions_(src.num_contact_regions_){}
   //--------------------------------------------------------------------
   IndependentContactRegions& IndependentContactRegions::operator=(IndependentContactRegions const& src)
   {
@@ -46,12 +66,14 @@ namespace ICR
 	grasp_=src.grasp_;
 	icr_computed_=src.icr_computed_;
 	contact_regions_=src.contact_regions_;
+#ifdef WITH_GUROBI
+        env_=src.env_;
+#endif
 	num_contact_regions_=src.num_contact_regions_;
       }
 
     return *this;
   }
-
   //--------------------------------------------------------------------
   std::ostream& operator<<(std::ostream& stream, IndependentContactRegions const& icr)
   {
@@ -88,12 +110,10 @@ namespace ICR
   }
   //--------------------------------------------------------------------
 #ifdef WITH_GUROBI
-  bool IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
+  bool IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)
   {
-    try
+    try				
       {
-	// struct timeval start, end;
-	// double c_time;
 
 	if ((prim_sz->satisfied_wc_ids_.array() == wc->id_).any())
 	  return true;
@@ -102,12 +122,10 @@ namespace ICR
 	uint S=prim_sz->hyperplane_ids_.size();
 	Eigen::MatrixXd W=wc->cone_;
 
-	GRBEnv env;
-	env.set(GRB_IntParam_OutputFlag,0);
-	env.set(GRB_IntParam_Presolve,0);
-	//env.set(GRB_IntParam_Method,0);
+	env_lock_.lock();
+	GRBModel lp(*env_);// = GRBModel(env);
+	env_lock_.unlock();
 
-	GRBModel lp(env);// = GRBModel(env);
         double* obj = new double[L+1]; std::fill_n(obj, L, 0); obj[L]=1; //only minimize slack variable z 
 	GRBVar* x =lp.addVars(NULL,NULL,obj,NULL,NULL,L+1); //LB = 0 
 	lp.update();
@@ -164,9 +182,10 @@ namespace ICR
       }
     catch(GRBException e) 
       {
-	std::cout<<"Gurobi exception with error code "<<e.getErrorCode()<<" in IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const"<<std::endl;
-	std::cout<<e.getMessage()<<std::endl;
-	return false;
+    	std::cout<<"Gurobi exception with error code "<<e.getErrorCode()<<" in IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const"<<std::endl;
+    	std::cout<<e.getMessage()<<std::endl;
+        exit(0);
+    	return false;
       }
   }
 #endif
@@ -198,7 +217,7 @@ namespace ICR
     return false;
   }
   //--------------------------------------------------------------------
-  bool IndependentContactRegions::searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type)const
+  bool IndependentContactRegions::searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type)
   {
 
     bool psz_satisfied;

@@ -7,6 +7,7 @@
 
 #ifdef WITH_GUROBI
 #include <gurobi_c++.h>
+#include <mutex>
 #endif
 
 namespace ICR
@@ -37,21 +38,23 @@ class IndependentContactRegions
  *  is the half-space which does not contain the origin;
  */
   bool primitiveSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const;
-  bool searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type)const;
+  bool searchZoneInclusionTest(uint region_id,Patch const* patch, const WrenchInclusionTestType wrench_inclusion_test_type);
   void computeContactRegionBFS(uint region_id, const WrenchInclusionTestType wrench_inclusion_test_type);
   void computeContactRegionFull(uint region_id, const WrenchInclusionTestType wrench_inclusion_test_type);
 
   #ifdef WITH_GUROBI
-  bool convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const;
+  bool convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc);
+  std::tr1::shared_ptr<GRBEnv> env_;
+  std::mutex env_lock_;
   #endif
 
  public:
 
   IndependentContactRegions();
   IndependentContactRegions(const SearchZonesPtr search_zones,const GraspPtr grasp);
-  /** \brief NOTE: Performes shallow copy of icr.  */
+  /** \brief NOTE: Performs shallow copy of icr.  */
   IndependentContactRegions(IndependentContactRegions const& src);
-  /** \brief NOTE: Performes shallow copy of icr.  */
+  /** \brief NOTE: Performs shallow copy of icr.  */
   IndependentContactRegions& operator=(IndependentContactRegions const& src);
   friend std::ostream& operator<<(std::ostream& stream, IndependentContactRegions const& icr);
   ~IndependentContactRegions();

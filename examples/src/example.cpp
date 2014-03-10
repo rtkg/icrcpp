@@ -67,7 +67,7 @@ int main()
   c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
   std::cout<<"Computation time icr: "<<c_time<<" s"<<std::endl;
   std::cout<<"icr: "<<icr<<std::endl;
-  
+  std::cout<<"Num icr: "<<icr.getNumICRPoints()<<std::endl;
   remove("/home/rkg/ros/generic/aass_icr/libicr/icrcpp/debug/icr.txt");
   icr.writeICR("/home/rkg/ros/generic/aass_icr/libicr/icrcpp/debug/icr.txt");
 
