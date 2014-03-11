@@ -9,6 +9,7 @@
 
 #ifdef WITH_GUROBI
 #include <gurobi_c++.h>
+#include <mutex>
 #endif
 
 namespace ICR
@@ -61,6 +62,8 @@ namespace ICR
 
 #ifdef WITH_GUROBI
   void computePrioritizedHyperplanes(uint finger_id);
+  std::shared_ptr<GRBEnv> env_;
+  std::mutex env_lock_;
 #endif
 
     SearchZones();

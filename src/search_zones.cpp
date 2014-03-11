@@ -25,21 +25,45 @@ namespace ICR
     return stream;
   }
   //-------------------------------------------------------------------
-  SearchZones::SearchZones() : num_search_zones_(0),search_zones_computed_(false)
+  SearchZones::SearchZones() : 
+num_search_zones_(0),
+#ifdef WITH_GUROBI
+env_(new GRBEnv),
+#endif
+search_zones_computed_(false)
   {
     search_zones_.clear();
+#ifdef WITH_GUROBI
+    env_->set(GRB_IntParam_OutputFlag,0);
+    env_->set(GRB_IntParam_Presolve,0);
+#endif
   }
   //-------------------------------------------------------------------
-  SearchZones::SearchZones(const GraspPtr grasp) : grasp_(grasp), num_search_zones_(0),search_zones_computed_(false)
+  SearchZones::SearchZones(const GraspPtr grasp) : 
+grasp_(grasp), 
+num_search_zones_(0),
+#ifdef WITH_GUROBI
+env_(new GRBEnv),
+#endif
+search_zones_computed_(false)
   {
     assert(grasp_->isInitialized());
     assert(grasp_->getGWS()->containsOrigin());
     search_zones_.clear();
+#ifdef WITH_GUROBI
+    env_->set(GRB_IntParam_OutputFlag,0);
+    env_->set(GRB_IntParam_Presolve,0);
+#endif
   }
   //-------------------------------------------------------------------
   SearchZones::SearchZones(SearchZones const& src) :  grasp_(src.grasp_), tws_(src.tws_), search_zones_(src.search_zones_),
 						      num_search_zones_(src.num_search_zones_), search_zones_computed_(src.search_zones_computed_),map_vertex2finger_(src.map_vertex2finger_),
-                                                      hyperplane_normals_(src.hyperplane_normals_),hyperplane_offsets_(src.hyperplane_offsets_){}
+                                                      hyperplane_normals_(src.hyperplane_normals_),hyperplane_offsets_(src.hyperplane_offsets_)
+{
+#ifdef WITH_GUROBI
+  env_=src.env_;
+#endif
+}
   //-------------------------------------------------------------------
   SearchZones& SearchZones::operator=(SearchZones const& src)
   {
@@ -53,6 +77,9 @@ namespace ICR
 	map_vertex2finger_=src.map_vertex2finger_;
 	hyperplane_normals_=src.hyperplane_normals_;
 	hyperplane_offsets_=src.hyperplane_offsets_;
+#ifdef WITH_GUROBI
+        env_=src.env_;
+#endif
       }
     return *this;
   }
@@ -256,14 +283,11 @@ namespace ICR
       }
     else if(tws_->getWrenchSpaceType() == Discrete)
       {
-	GRBEnv env;
-	env.set(GRB_IntParam_OutputFlag,0);
-	env.set(GRB_IntParam_Presolve,0);
-       	//   env.set(GRB_IntParam_Method,2);
 
        	//Should assert that the TWS contains the origin ...
        	Eigen::MatrixXd TW(K,dynamic_cast<DiscreteTaskWrenchSpace*>(tws_.get())->getNumWrenches());
 	doubleArrayToEigenMatrix(dynamic_cast<DiscreteTaskWrenchSpace*>(tws_.get())->getWrenches().get(),TW);
+	uint nT=TW.cols();
 
 	for(uint h=0; h < H;h++)
 	  {
@@ -312,8 +336,13 @@ namespace ICR
 	      }
 
 	    //SOLVE THE TILT PROBLEM
+            uint nP=P.cols(); 
+            uint nR=R.cols();
+            
+            env_lock_.lock();
+	    GRBModel qp(*env_);
+            env_lock_.unlock();
 
-	    GRBModel qp = GRBModel(env);
             double* lb_x = new double[K+1]; std::fill_n(lb_x, K+1,std::numeric_limits<double>::infinity()*(-1)); lb_x[K]=0; //lower bound on eh is only given for numerical reasons - solver f***s up otherwise ...
 	    GRBVar* x =qp.addVars(lb_x,NULL,NULL,NULL,NULL,K+1);
 	    //just some convenience pointers ...
@@ -321,6 +350,7 @@ namespace ICR
             GRBVar* eh=(x+K);
 	    qp.update();
 	 
+	
 	    //Objective
             GRBQuadExpr obj = 0.0;
             for (uint k=0; k<K;k++)
@@ -328,61 +358,67 @@ namespace ICR
 
             qp.setObjective(obj,GRB_MINIMIZE);
 
-	    //Equality constriants
-	    GRBLinExpr* eq_c_expr=new GRBLinExpr[P.cols()];
-            char* eq_c_senses = new char[P.cols()];  std::fill_n(eq_c_senses,P.cols(),GRB_EQUAL); 
-            double* eq_c_rhs = new double[P.cols()]; std::fill_n(eq_c_rhs,P.cols(),0.0);           
-            double** p_i = new double*[P.cols()];
-	    for (uint i=0; i<P.cols();i++)
+	    double one[1]; one[0]=1; double minus_one[1]; minus_one[0]=-1;
+	    double* coeff;
+	    //Inequality constraints on points in TW
+	    for (uint i=0; i<nT;i++)
 	      {
-		eigenMatrixToDoubleArray(P.col(i),p_i[i]);
-		eq_c_expr[i] = 0.0;
-		for (uint k=0; k<K;k++)
-		  eq_c_expr[i] += p_i[i][k]*nh[k];
+		eigenMatrixToDoubleArray(-TW.col(i),coeff);
+	
+                GRBLinExpr lhs; 
+                lhs.addTerms(coeff,nh,K);
+                lhs.addTerms(minus_one,eh,1);
+		qp.addConstr(lhs,GRB_LESS_EQUAL,0);
 
-		eq_c_expr[i]+=eh[0];             
+		delete[] coeff;
 	      }
-	    GRBConstr* eq_c= qp.addConstrs(eq_c_expr,eq_c_senses,eq_c_rhs,NULL,P.cols());
+           //Inequality constraints on points in R
+	    for (uint i=0; i<nR;i++)
+	      {
+		eigenMatrixToDoubleArray(R.col(i),coeff);
+	
+                GRBLinExpr lhs; 
+                lhs.addTerms(coeff,nh,K);
+                lhs.addTerms(one,eh,1);
+		qp.addConstr(lhs,GRB_LESS_EQUAL,0);
 
-	    //Inequality constriants on R
-   	    GRBLinExpr* ineq_c_R_expr=new GRBLinExpr[R.cols()];
-            char* ineq_c_R_senses = new char[R.cols()];  std::fill_n(ineq_c_R_senses,R.cols(),GRB_LESS_EQUAL); 
-            double* ineq_c_R_rhs = new double[P.cols()]; std::fill_n(ineq_c_R_rhs,R.cols(),-1.0);           
-            double** r_i = new double*[R.cols()];
-   	    for (uint i=0; i<R.cols();i++)
-   	      {
-   		eigenMatrixToDoubleArray(R.col(i),r_i[i]);
-   		ineq_c_R_expr[i] = 0.0;
-   		for (uint k=0; k<K;k++)
-   		  ineq_c_R_expr[i] += r_i[i][k]*nh[k];
+		delete[] coeff;
+	      }
+            //equality constraints on points in P
+	    for (uint i=0; i<nP;i++)
+	      {
+		eigenMatrixToDoubleArray(P.col(i),coeff);
+	
+                GRBLinExpr lhs; 
+                lhs.addTerms(coeff,nh,K);
+                lhs.addTerms(one,eh,1);
+		qp.addConstr(lhs,GRB_EQUAL,0);
 
-   		ineq_c_R_expr[i]+=eh[0];             
-   	      }
-   	    GRBConstr* ineq_c_R= qp.addConstrs(ineq_c_R_expr,ineq_c_R_senses,ineq_c_R_rhs,NULL,R.cols());
+		delete[] coeff;
+	      }
 
-	    //Inequality constriants on TW
-   	    GRBLinExpr* ineq_c_T_expr=new GRBLinExpr[TW.cols()];
-            char* ineq_c_T_senses = new char[TW.cols()];  std::fill_n(ineq_c_T_senses,TW.cols(),GRB_LESS_EQUAL); 
-            double* ineq_c_T_rhs = new double[TW.cols()]; std::fill_n(ineq_c_T_rhs,TW.cols(),0.0);           
-            double** t_i = new double*[TW.cols()];
-   	    for (uint i=0; i<TW.cols();i++)
-   	      {
-   		eigenMatrixToDoubleArray(R.col(i),t_i[i]);
-   		ineq_c_T_expr[i] = 0.0;
-   		for (uint k=0; k<K;k++)
-   		  ineq_c_T_expr[i] += t_i[i][k]*nh[k];
+	    // //DEBUG: Plot constraints ...
+            //  qp.update();
+	    // GRBConstr* constrs =qp.getConstrs();
+	    // for (uint i=0; i<qp.get(GRB_IntAttr_NumConstrs);i++)
+	    //   {
+	    // 	std::cout<<constrs[i].get(GRB_StringAttr_ConstrName)<<": ";
+	    // 	GRBLinExpr l=qp.getRow(constrs[i]);
+            //     for (uint j=0; j<l.size();j++)
+	    // 	  std::cout<<l.getCoeff(j)<<"*"<<l.getVar(j).get(GRB_StringAttr_VarName)<<" ";
 
-   		ineq_c_T_expr[i]+=eh[0];                         
-   	      }
-   	    GRBConstr* ineq_c_T= qp.addConstrs(ineq_c_T_expr,ineq_c_T_senses,ineq_c_T_rhs,NULL,TW.cols());
+	    // 	std::cout<<constrs[i].get(GRB_CharAttr_Sense)<<" "<<constrs[i].get(GRB_DoubleAttr_RHS)<<std::endl;
+            //   }
+	    // //DEBUG: End 
 
-            qp.update();
+
+	    qp.update();
 	    qp.optimize();
 	    int status = qp.get(GRB_IntAttr_Status);
 
 	    if (status != GRB_OPTIMAL) 
 	      {
-		std::cout<<"Error in SearchZones::computePrioritizedHyperplanes(uint finger_id) - QP solution not found! Exiting ..."<<std::endl;
+		std::cout<<"Error in SearchZones::computePrioritizedHyperplanes(uint finger_id) - QP solution not found! Exiting with status "<<status<<std::endl;
 		exit(0);
 	      }
 
@@ -409,18 +445,8 @@ namespace ICR
 	    assert(hyperplane_offsets_(h) >= 0); //just to be sure ...           
 	    curr_f=curr_f.next();
 
- 	    //clean-up
-	    for (uint i=0; i<TW.cols();i++)
-	      delete[] t_i[i];
-	    for (uint i=0; i<P.cols();i++)
-	      delete[] p_i[i];
-	    for (uint i=0; i<R.cols();i++)
-	      delete[] r_i[i];
-
-	    delete[] x; delete[] lb_x; delete[] x_opt; 
-	    delete[] p_i; delete[] eq_c_senses; delete[] eq_c_rhs; delete[] eq_c; delete[] eq_c_expr;
-	    delete[] r_i; delete[] ineq_c_R_senses; delete[] ineq_c_R_rhs; delete[] ineq_c_R; delete[] ineq_c_R_expr;
-	    delete[] t_i; delete[] ineq_c_T_senses; delete[] ineq_c_T_rhs; delete[] ineq_c_T; delete[] ineq_c_T_expr; 
+	     //clean-up
+	     delete[] x; delete[] lb_x; delete[] x_opt; 
 	  }
       }
     else

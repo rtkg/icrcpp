@@ -83,7 +83,7 @@
  *    undefined facets - should find some workaround for this to reduce the unnecessary large number
  *    of hyperplanes (edit: also the Q0 options seems to work which doesn't produce redundant planes...)
  *
- *- Implement prioritized QP search zone computation for sphericas task wrench spaces
+ *- Implement prioritized QP search zone computation for spherical task wrench spaces
  *
  *- Try a version of the QP-based search zone computation as one 'big' QP for all hyperplanes - should be faster
  *
@@ -91,9 +91,7 @@
  *
  *- Change the Discrete Wrench Space constructors to accept shared pointers instead of double*
  *
- *- Still a small memory leak in
- *    ICR::IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone*
- *   prim_sz,WrenchCone const* wc)const - seemst to be produced by Gurobi's GRBEnv constructor
+ *- Still small memory leaks in the destructors of ICR::DiscreteWrenchSpace and ICR::Grasp -> FIXME!
  *
  *- Add a filter method to the ICR::IndependentContactRegions class to remove duplicated points from regions 
  *
@@ -104,8 +102,6 @@
  *- Should add a public method to allow dividing the OWS by lambda not only via a preprocessor flag
  *
  *- Wrench space inclusion test type should be set in the ICR::IndependentContactRegions class, not via finger parameters in the fingers
- *
- *- Pinpoint the cause of the sporadic Gurobi exceptions in IndependentContactRegions::convexCombinationSearchZoneInclusionTest(PrimitiveSearchZone* prim_sz,WrenchCone const* wc)const
  *
  *- Add a flipNormals() method to the ICR::TargetObject class to invert vertex normal directions
  *

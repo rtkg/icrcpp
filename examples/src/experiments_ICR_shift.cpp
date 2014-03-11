@@ -30,7 +30,7 @@ int main()
   double c_time;
 
   //PARAMETERS
-  std::string name="Fish_5k";
+  std::string name="Tortoise_5k";
   std::string save_path="/home/rkg/Data/Coding/ICR/experiments/shift/";
   uint nG=1000;
   uint nF=4;

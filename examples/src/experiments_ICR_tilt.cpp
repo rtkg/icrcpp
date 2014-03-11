@@ -23,46 +23,41 @@ void writeValues(const std::string& path, const Eigen::VectorXd& values)
   fprintf(f,"\n");
   fclose (f);
 }
-//--------------------------------------------------------------------------------
-void readGrasps(const std::string& path, Eigen::MatrixXi& G_mat)
-{
-  uint M=G_mat.rows();
-  uint N=G_mat.cols();
+// //--------------------------------------------------------------------------------
+// void readGrasps(const std::string& path, Eigen::MatrixXi& G_mat)
+// {
+//   uint M=G_mat.rows();
+//   uint N=G_mat.cols();
 
-  std::ifstream f;
-  f.open(path);
+//   std::ifstream f;
+//   f.open(path);
 
-  if(f.fail())
-    {
-      std::cout<<"Couldn't read file "<<path<<". Exiting..."<<std::endl;
-      exit(0);
-    }
+//   if(f.fail())
+//     {
+//       std::cout<<"Couldn't read file "<<path<<". Exiting..."<<std::endl;
+//       exit(0);
+//     }
 
-  for (uint i=0; i<M;i++)
-    for (uint j=0;j<N;j++)
-      {
-	f>>G_mat(i,j);
-	G_mat(i,j)=G_mat(i,j)-1; //revert from matalb indexing to C++ 0-based indexing
-      }
-}
+//   for (uint i=0; i<M;i++)
+//     for (uint j=0;j<N;j++)
+//       {
+// 	f>>G_mat(i,j);
+// 	G_mat(i,j)=G_mat(i,j)-1; //revert from matalb indexing to C++ 0-based indexing
+//       }
+// }
 //--------------------------------------------------------------------------------
 int main()
 {
   struct timeval start, end;
-  double c_time;
 
   //PARAMETERS
   std::string name="Fish_5k";
   std::string save_path="/home/rkg/Data/Coding/ICR/experiments/tilt/";
   uint nG=1000;
-  uint nF=4;
+  uint nF=3;
   double g_scale=0.1; //scale used for gravity
   double mu=0.5;
   uint L=8;
-
-  //LOAD GRASPS
-  Eigen::MatrixXi G_mat(nG,nF);
-  readGrasps((save_path+name+"_G_8_0.5.txt"),G_mat);
 
   //LOAD TARGET OBJECT
   ObjectLoader obj_loader;
@@ -80,71 +75,74 @@ int main()
 #else
   double lambda=1;
 #endif
+
   t_wrenches_e.bottomRows(3)=(*obj->getCentroid()).cross(g_force)/lambda;
   //  SharedDoublePtr t_wrenches(new double[12]); double* temp=t_wrenches.get();
   double* temp=new double[12]; eigenMatrixToDoubleArray(t_wrenches_e,temp);
   SharedDoublePtr t_wrenches(temp);
   WrenchSpacePtr tws(new DiscreteTaskWrenchSpace(6,t_wrenches,2)); 
 
+  remove((save_path+name+"_P.txt").c_str());
+  remove((save_path+name+"_CT.txt").c_str());
+  remove((save_path+name+"_ICR_PW.txt").c_str());
+  remove((save_path+name+"_ICR_CC.txt").c_str());
+
+  uint count=0;
   Eigen::Vector3d c_times; 
   FParamList f_parameters(nF);
   FingerParameters parameters;
-  VectorXui G(nF);
+  VectorXui G;
+  Eigen::VectorXd p_values(3,1);
   parameters.setFrictionalContact(1, L, mu);
-
   for (uint i=0; i<nG;i++)
-    {
-      parameters.setWrenchIncusionTestType(Primitive);
-      for (uint p=0;p<nF;p++)
-	f_parameters[p]=parameters;
+    { 
+      G=generateRandomGrasp(obj,f_parameters,tws);
 
-      //Current grasp indices
-      for (uint n=0;n<nF;n++)
-	G(n)=G_mat(i,n);
+      for (uint j=0; j<nF;j++)
+	{
+          p_values(0)=nF; p_values(1)=mu; p_values(2)=L;
+	  writeValues(save_path+name+"_P.txt",p_values);
 
-      std::cout<<"G: "<<G<<std::endl;
-      //Seed the random number generator and compute a random number 0 <= c < nF
-      gettimeofday(&start,0);
-      srand(start.tv_usec);
-      int c=rand()%nF;
-      std::cout<<"c: "<<c<<std::endl;
-      //COMPUTE ICR WITH PRIMITIVE WRENCH INCLUSION
-      GraspPtr prototype_grasp(new Grasp());
-      gettimeofday(&start,0);
-      prototype_grasp->init(f_parameters,obj,G);
-      SearchZonesPtr search_zones(new SearchZones(prototype_grasp));
-      search_zones->setTaskWrenchSpace(tws);
-      search_zones->computePrioritizedSearchZones(c);
-      gettimeofday(&end,0);
-      c_times(0) = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
-      gettimeofday(&start,0);
-      IndependentContactRegions icr_pw(search_zones,prototype_grasp);
-      icr_pw.computeICR(BFS);
-      gettimeofday(&end,0);
-      c_times(1) = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
-      icr_pw.writeICR(save_path+name+"_ICR_PW.txt");
-      // std::cout<<"ICR PRIMITIVE: "<<icr_pw<<std::endl;
+	  //COMPUTE ICR WITH PRIMITIVE WRENCH INCLUSION
+	  for (uint p=0;p<nF;p++)
+	    f_parameters[p].setWrenchIncusionTestType(Primitive);
 
-      //COMPUTE ICR WITH LP WRENCH INCLUSION
-      for (int i=0;i<nF;i++)
-	f_parameters[i].setWrenchIncusionTestType(Convex_Combination);
+	  GraspPtr prototype_grasp(new Grasp());
+	  prototype_grasp->init(f_parameters,obj,G);
+	  gettimeofday(&start,0);
+	  SearchZonesPtr search_zones(new SearchZones(prototype_grasp));
+	  search_zones->setTaskWrenchSpace(tws);
+	  search_zones->computePrioritizedSearchZones(j);
+	  gettimeofday(&end,0);
+	  c_times(0) = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
+	  gettimeofday(&start,0);
+	  IndependentContactRegions icr_pw(search_zones,prototype_grasp);
+	  icr_pw.computeICR(BFS);
+	  gettimeofday(&end,0);
+	  c_times(1) = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
+	  icr_pw.writeICR(save_path+name+"_ICR_PW.txt");
+  
+	  //COMPUTE ICR WITH LP WRENCH INCLUSION
+	  for (int i=0;i<nF;i++)
+	    f_parameters[i].setWrenchIncusionTestType(Convex_Combination);
 
-      prototype_grasp.reset(new Grasp());
-      prototype_grasp->init(f_parameters,obj,G);
-      search_zones.reset(new SearchZones(prototype_grasp));
-      search_zones->setTaskWrenchSpace(tws);
-      search_zones->computeShiftedSearchZones();
-      gettimeofday(&start,0);
-      IndependentContactRegions icr_cc(search_zones,prototype_grasp);
-      icr_cc.computeICR(BFS);
-      gettimeofday(&end,0);
-      c_times(2) = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
-      icr_cc.writeICR(save_path+name+"_ICR_CC.txt");
-      // std::cout<<"ICR CONVEX COMBINATION: "<<icr_cc<<std::endl;
+	  prototype_grasp.reset(new Grasp());
+	  prototype_grasp->init(f_parameters,obj,G);
+	  search_zones.reset(new SearchZones(prototype_grasp));
+	  search_zones->setTaskWrenchSpace(tws);
+	  search_zones->computePrioritizedSearchZones(j);
+	  gettimeofday(&start,0);
+	  IndependentContactRegions icr_cc(search_zones,prototype_grasp);
+	  icr_cc.computeICR(BFS);
+	  gettimeofday(&end,0);
+	  c_times(2) = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
+	  icr_cc.writeICR(save_path+name+"_ICR_CC.txt");
+	  // std::cout<<"ICR CONVEX COMBINATION: "<<icr_cc<<std::endl;
 	 
-      writeValues(save_path+name+"_CT.txt",c_times);
-      std::cout<<nG-i-1 <<" checks to go..."<<std::endl;
+	  writeValues(save_path+name+"_CT.txt",c_times);
+	  count++;
+	  std::cout<<nG*nF-count <<" checks to go..."<<std::endl;
+	}
     }
-
   return 0;
 }
