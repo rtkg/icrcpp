@@ -109,7 +109,6 @@
  *
  *- Add a flipNormals() method to the ICR::TargetObject class to invert vertex normal directions
  *
- *- Make the Gurobi environment a member of the ICR::IndependentContactRegions class and protect it with a mutex
  */
 
 #include "utilities.h"
