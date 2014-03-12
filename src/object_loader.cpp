@@ -107,6 +107,7 @@ namespace ICR
     for(uint vn_id=0; vn_id < normals_buffer.size(); vn_id++)
       delete[] normals_buffer[vn_id];
  
+    object_->computeCentroid();
     object_->name_=name;
     object_loaded_=true;
 

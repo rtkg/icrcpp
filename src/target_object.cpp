@@ -108,6 +108,9 @@ namespace ICR
     for (uint i=0; i<contact_points_.size(); i++)
 	contact_points_[i]->transform(transform);
 
+    if (centroid_computed_)
+      (*centroid_)=transform*(*centroid_);
+
  }
   //--------------------------------------------------------------------
 }//namespace ICR
