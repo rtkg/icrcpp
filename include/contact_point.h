@@ -3,6 +3,7 @@
 
 #include "utilities.h"
 #include <iostream>
+#include <Eigen/Geometry>
 
 namespace ICR
 {
@@ -52,6 +53,7 @@ class ContactPoint
   void setVertexNormal(Eigen::Vector3d const& vertex_normal);
   void setVertexNormal(double const vertex_normal[3]);
   void addNeighbor(uint neighbor);
+  void transform(const Eigen::Affine3d& transform);
 /*! 
  *  Removes duplicated id's from ICR::ContactPoint#neighbors_; Has no effect if there aren't any duplicates;
  */

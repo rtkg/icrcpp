@@ -118,4 +118,21 @@ bool ContactPoint::isNeighbor(uint id)const
  return false;
 }
 //---------------------------------------------------------------------------------
+void ContactPoint::transform(const Eigen::Affine3d& transform)
+{
+  
+  
+  std::cout<<"Rotation: "<<std::endl<<transform.rotation()<<std::endl<<"translation: "<<transform.translation().transpose()<<std::endl;
+
+  std::cout<<"vertex before: "<<vertex_.transpose()<<std::endl;
+  std::cout<<"vertex normal before: "<<vertex_normal_.transpose()<<std::endl;
+
+   vertex_=transform*vertex_;
+   vertex_normal_=transform.rotation()*vertex_normal_;
+
+   std::cout<<"vertex after: "<<vertex_.transpose()<<std::endl;
+   std::cout<<"vertex normal after: "<<vertex_normal_.transpose()<<std::endl<<std::endl;
+
+}
+//---------------------------------------------------------------------------------
 }//namespace ICR

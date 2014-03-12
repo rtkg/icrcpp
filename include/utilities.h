@@ -79,7 +79,7 @@ typedef std::tr1::shared_ptr<WrenchSpace> WrenchSpacePtr;
 typedef std::tr1::shared_ptr<DiscreteWrenchSpace> DiscreteWrenchSpacePtr;
 typedef std::tr1::shared_ptr<DiscreteTaskWrenchSpace> DiscreteTaskWrenchSpacePtr;
 typedef std::tr1::shared_ptr<SphericalWrenchSpace> SphericalWrenchSpacePtr;
- typedef std::tr1::shared_ptr<Eigen::Vector3d> Vector3dPtr;
+typedef std::tr1::shared_ptr<Eigen::Vector3d> Vector3dPtr;
 //--------------------------------------------------------------------
 Eigen::Matrix3d skewSymmetricMatrix(Eigen::Vector3d vector);
 //--------------------------------------------------------------------

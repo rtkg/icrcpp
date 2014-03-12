@@ -55,6 +55,7 @@ class TargetObject
  *  ICR::TargetObject#contact_points_ with scale
  */
   void scaleObject(double scale);
+  void transform(const Eigen::Affine3d& transform);
   ContactPoint const* getContactPoint(uint id) const;
 };
 //--------------------------------------------------------------------

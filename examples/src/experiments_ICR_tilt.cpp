@@ -51,7 +51,7 @@ int main()
   struct timeval start, end;
 
   //PARAMETERS
-  std::string name="Fish_5k";
+  std::string name="CokePlasticSmall_5k";
   std::string save_path="/home/rkg/Data/Coding/ICR/experiments/tilt/";
   uint nG=1000;
   uint nF=3;

@@ -103,4 +103,11 @@ namespace ICR
     return centroid_;
   }
   //--------------------------------------------------------------------
+  void TargetObject::transform(const Eigen::Affine3d& transform)
+  {
+    for (uint i=0; i<contact_points_.size(); i++)
+	contact_points_[i]->transform(transform);
+
+ }
+  //--------------------------------------------------------------------
 }//namespace ICR
