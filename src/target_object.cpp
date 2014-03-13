@@ -113,4 +113,35 @@ namespace ICR
 
  }
   //--------------------------------------------------------------------
+bool TargetObject::writeToFile(const std::string& points_path, const std::string& normals_path,const std::string& neighbors_path)const
+  {
+    remove(points_path.c_str());
+    remove(normals_path.c_str());
+    remove(neighbors_path.c_str());
+    FILE* cp=fopen (points_path.c_str(),"a");
+    FILE* vn=fopen (normals_path.c_str(),"a");
+    FILE* nb=fopen (neighbors_path.c_str(),"a");
+    if(!vn |!cp |!nb )
+      {
+	std::cout<<"Warning in TargetObject::writeToFile(const std::string& points_path, const std::string& normals_path,const std::string& neighbors_path)const - Couldn't write to file"<<std::endl;
+	return false;
+      }
+    Eigen::Vector3d cp_vtx;
+    Eigen::Vector3d cp_vtx_normal;
+    for(uint id=0; id < num_cp_;id++)
+      {
+	cp_vtx=*getContactPoint(id)->getVertex();
+	cp_vtx_normal=*getContactPoint(id)->getVertexNormal();
+	fprintf(cp, "% f % f % f \n", cp_vtx(0),cp_vtx(1),cp_vtx(2));
+	fprintf(vn, "% f % f % f \n", cp_vtx_normal(0),cp_vtx_normal(1),cp_vtx_normal(2));
+
+	for (ConstIndexListIterator it= getContactPoint(id)->getNeighborItBegin(); it !=getContactPoint(id)->getNeighborItEnd(); it++)
+	  fprintf(nb, "% d",*it+1);//Indexing of neighboring points starting from 1 instead of 0
+
+	fprintf(nb, "\n");
+      }
+    fclose (cp); fclose (vn); fclose (nb);
+    return true;
+}
+  //--------------------------------------------------------------------
 }//namespace ICR

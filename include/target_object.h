@@ -57,6 +57,7 @@ class TargetObject
   void scaleObject(double scale);
   void transform(const Eigen::Affine3d& transform);
   ContactPoint const* getContactPoint(uint id) const;
+  bool writeToFile(const std::string& points_path, const std::string& normals_path,const std::string& neighbors_path)const;
 };
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------

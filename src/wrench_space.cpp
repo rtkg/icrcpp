@@ -238,25 +238,8 @@ namespace ICR
 
     facetT* curr_f=conv_hull_.beginFacet().getFacetT();
     r_oc_insphere_=-(curr_f->offset);
-
-#ifdef DEBUG_DISCRETEWRENCHSPACE // File for writing the hyperplanes to a file to compare in Matlab
-    remove("../debug/hyperplanes.txt");
-    FILE* hp=fopen ("../debug/hyperplanes.txt","a");
-    if(!hp)
-      std::cout<<"Warning in DiscreteWrenchSpace: Couldn't write to file."<<std::endl;
-#endif
-  
     for(uint i=0;i< num_facets_;i++)
       {
-
-#ifdef DEBUG_DISCRETEWRENCHSPACE //Write hyperplanes to file
-	if (dimension_==3)
-	  fprintf(hp, "% f % f % f % f  \n",(curr_f->normal)[0],(curr_f->normal)[1],(curr_f->normal)[2],curr_f->offset);
-	else if (dimension_==6)
-	  fprintf(hp, "% f % f % f % f % f % f %f \n",(curr_f->normal)[0],(curr_f->normal)[1],(curr_f->normal)[2],(curr_f->normal)[3],(curr_f->normal)[4],(curr_f->normal)[5],curr_f->offset);
-	else
-	  std::cout<<"Error in DiscreteWrenchSpace::computeConvexHull() - cann only write 3- or 6D hyperplanes to file!"<<std::endl;
-#endif
 	curr_f->id=i; //Replaces the Qhull runtime indexing with indices 0 - num_facets_
 	r_oc_insphere_ = (-(curr_f->offset) < r_oc_insphere_) ? -(curr_f->offset) : r_oc_insphere_;
 	curr_f=curr_f->next;
@@ -265,10 +248,6 @@ namespace ICR
     contains_origin_=(r_oc_insphere_ > EPSILON_FORCE_CLOSURE) ? true : false;
     full_dim_=true;
     ch_computed_=true;
- 
-#ifdef DEBUG_DISCRETEWRENCHSPACE
-    fclose (hp);
-#endif
   }
   //--------------------------------------------------------------------------
   uint DiscreteWrenchSpace::getNumWrenches()const{return num_wrenches_;}
@@ -285,6 +264,39 @@ namespace ICR
     assert(wrenches.get() != NULL);
     wrenches_=wrenches;
     num_wrenches_=num_wrenches;
+  }
+  //---------------------------------------------------------------------------------
+  bool DiscreteWrenchSpace::writeToFile(const std::string& path)const
+  {
+    if (!ch_computed_)
+      {
+	std::cout<<"Warning in DiscreteWrenchSpace::writeToFile(const std::string& path)const - Convex hull not computed, cannot write to file"<<std::endl;
+	return false;
+      }
+
+    remove(path.c_str());
+    FILE* hp=fopen (path.c_str(),"a");
+    if(!hp)
+      {
+	std::cout<<"Warning in DiscreteWrenchSpace::writeToFile(const std::string& path)const - Couldn't write to file"<<std::endl;
+	return false;
+      }
+    facetT* curr_f=conv_hull_.beginFacet().getFacetT();
+    for(uint i=0;i< conv_hull_.facetCount();i++)
+      {
+	if (dimension_==3)
+	  fprintf(hp, "% f % f % f % f  \n",-(curr_f->normal)[0],-(curr_f->normal)[1],-(curr_f->normal)[2],-(curr_f->offset));
+	else if (dimension_==6)
+	  fprintf(hp, "% f % f % f % f % f % f %f \n",-(curr_f->normal)[0],-(curr_f->normal)[1],-(curr_f->normal)[2],-(curr_f->normal)[3],-(curr_f->normal)[4],-(curr_f->normal)[5],-(curr_f->offset));
+	else
+	  {
+	    std::cout<<"Warning in DiscreteWrenchSpace::writeToFile(const std::string& path)const - cann only write 3- or 6D hyperplanes to file!"<<std::endl;
+	    return false;
+	  }
+	curr_f=curr_f->next;
+      }
+    fclose (hp);
+    return true;
   }
   //---------------------------------------------------------------------------------
   DiscreteTaskWrenchSpace::DiscreteTaskWrenchSpace() : num_wrenches_(0)

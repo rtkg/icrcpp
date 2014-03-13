@@ -51,6 +51,7 @@ class OWS
   void divideByLambda();  
   double getLambda()const;
   std::string getParentObjectName()const;
+  bool writeToFile(const std::string& path)const;
 };
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------

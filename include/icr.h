@@ -105,7 +105,7 @@
  *
  *- Add a flipNormals() method to the ICR::TargetObject class to invert vertex normal directions
  *
- *- Remove debug flags for writing properties to hardcoded files and implement methods taking a path instead
+ *- Assertion (angle==angle) in  OWS::addWrenchCone(uint id,Eigen::Vector3d const* const cp_vtx, Eigen::Vector3d const* const cp_vtx_normal) has happend to fail -> FIXME!
  *
  */
 

@@ -115,35 +115,6 @@ namespace ICR
     normals_buffer.clear();
     callback_obj_ptr=NULL;
     face_callback_run=false;
-
-#ifdef DEBUG_OBJECT_LOADER //write the loaded object
-    remove("../debug/points.txt");
-    remove("../debug/normals.txt");
-    remove("../debug/neighbors.txt");
-    FILE* cp=fopen ("../debug/points.txt","a");
-    FILE* vn=fopen ("../debug/normals.txt","a");
-    FILE* nb=fopen ("../debug/neighbors.txt","a");
-    if(!vn |!cp |!nb )
-      {
-	std::cout<<"Error in ObjectLoader: Couldn't write to file. Exiting..."<<std::endl;
-	exit(1);
-      }
-    Eigen::Vector3d cp_vtx;
-    Eigen::Vector3d cp_vtx_normal;
-    for(uint id=0; id < object_->num_cp_;id++)
-      {
-	cp_vtx=*object_->getContactPoint(id)->getVertex();
-	cp_vtx_normal=*object_->getContactPoint(id)->getVertexNormal();
-	fprintf(cp, "% f % f % f \n", cp_vtx(0),cp_vtx(1),cp_vtx(2));
-	fprintf(vn, "% f % f % f \n", cp_vtx_normal(0),cp_vtx_normal(1),cp_vtx_normal(2));
-
-	for (ConstIndexListIterator it= object_->getContactPoint(id)->getNeighborItBegin(); it !=object_->getContactPoint(id)->getNeighborItEnd(); it++)
-	  fprintf(nb, "% d",*it+1);//Indexing of neighboring points starting from 1 instead of 0
-
-	fprintf(nb, "\n");
-      }
-    fclose (cp); fclose (vn); fclose (nb);
-#endif
   }
   //--------------------------------------------------------------------
   void ObjectLoader::geometric_vertex_callback(obj::float_type x, obj::float_type y, obj::float_type z)

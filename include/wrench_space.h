@@ -118,7 +118,7 @@ class DiscreteWrenchSpace : public WrenchSpace
  uint getNumVertices()const;
  uint getNumFacets()const;
  SharedDoublePtr getWrenches()const;
-
+ bool writeToFile(const std::string& path)const;
  void setWrenches(SharedDoublePtr wrenches,uint num_wrenches);
 };
 //---------------------------------------------------------------------------------
