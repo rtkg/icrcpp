@@ -105,7 +105,7 @@
  *
  *- Add a flipNormals() method to the ICR::TargetObject class to invert vertex normal directions
  *
- *- Assertion (angle==angle) in  OWS::addWrenchCone(uint id,Eigen::Vector3d const* const cp_vtx, Eigen::Vector3d const* const cp_vtx_normal) has happend to fail -> FIXME!
+ *- ICR::IndependentContactRegions and ICR::SearchZones shouldn't have a GraspPtr member...
  *
  */
 

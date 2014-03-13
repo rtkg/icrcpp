@@ -122,6 +122,7 @@ namespace ICR
   {
     vertex_=transform*vertex_;
     vertex_normal_=transform.rotation()*vertex_normal_;
+    vertex_normal_.normalize();//just to be sure ...
   }
   //---------------------------------------------------------------------------------
 }//namespace ICR

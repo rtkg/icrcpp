@@ -1,0 +1,11 @@
+G from icr: 0 0 0 0 0 
+G from icr grasp: 1621 846 818 712 664 
+G from prototype grasp: 1621 846 818 712 664 
+G from search zone grasp: 1621 846 818 712 664 
+Spherical TWS radius: 4.01663e-14
+num icr: 12500
+O_F_T_: 
+ 0.796037 0.0269187 -0.604648 0.0412906
+0.0496618  0.992737  0.109578  0.174019
+ 0.603207 -0.117256  0.788919 -0.106969
+
