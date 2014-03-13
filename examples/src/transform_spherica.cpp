@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <time.h>
+#include <Eigen/Geometry>
 
 using namespace ICR;
 
@@ -9,67 +10,59 @@ int main()
 { 
   //Load a new target object 
   ObjectLoader obj_loader;
-  obj_loader.loadObject("../models/Sprayflask_5k.obj","Sprayflask_5k");
+  obj_loader.loadObject("../models/Fish_5k.obj","Fish_5k");
+  TargetObjectPtr obj=obj_loader.getObject();
  
   //Create a list of default finger parameters (default parameters defined in config.h) and a 
   //vector of centerpoint contact id's for the 
   FParamList f_parameters;
   FingerParameters parameters;
-  parameters.setFrictionalContact (1, 8, 0.8);
+  parameters.setFrictionalContact (1, 100, 0.8);
   parameters.setWrenchIncusionTestType(Primitive);
   parameters.setContactModelType(Single_Point); 
   parameters.setInclusionRuleType(Sphere);
   parameters.setInclusionRuleParameter(10);
   //parameters.setSoftFingerContact(1, 8, 0.8, 0.8);
-  uint n_fingers=5; //number of fingers in the prototype grasp
+  ICR::uint n_fingers=4; //number of fingers in the prototype grasp
   for (int i=0;i<n_fingers;i++)
     f_parameters.push_back(parameters);
   
+SphericalWrenchSpacePtr tws(new SphericalWrenchSpace(6,1e-15));
+
   VectorXui centerpoint_ids(n_fingers);
-
-    WrenchSpacePtr tws(new SphericalWrenchSpace(6,0.000501277));
-    //   centerpoint_ids=generateRandomGrasp(obj_loader.getObject(),f_parameters,tws);
-    centerpoint_ids<<447,1159,1139,1274,1272;
-
-  //Create a prototype grasp and search zones, the parameter alpha is the scale of the largest
-  //origin-centered ball contained by the Grasp wrench space of the prototype grasp
-
+ centerpoint_ids<<1929,910, 642,1554;
 
   GraspPtr prototype_grasp(new Grasp());
-  prototype_grasp->init(f_parameters,obj_loader.getObject(),centerpoint_ids);
+  prototype_grasp->init(f_parameters,obj,centerpoint_ids);
   prototype_grasp->setCenterPointIds(centerpoint_ids);
   SearchZonesPtr search_zones(new SearchZones(prototype_grasp));
-
-  // //  Create a new Discrete Task Wrench Space
-  // double *a=new double[6]; std::fill_n(a, 6, 0); 
-  // SharedDoublePtr t_wrenches(a); 
-  // DiscreteTaskWrenchSpacePtr tws(new DiscreteTaskWrenchSpace(6,t_wrenches,1));  // 	DiscreteTaskWrenchSpace (uint dimension, SharedDoublePtr wrenches, uint num_wrenches)
-  // search_zones->setTaskWrenchSpace(tws);
-
    search_zones->setTaskWrenchSpace(tws);
-
-  struct timeval start, end;
-  double c_time;
-  gettimeofday(&start,0);
-  //search_zones->computePrioritizedSearchZones(1);
   search_zones->computeShiftedSearchZones();
-  gettimeofday(&end,0);
-  c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
-  std::cout<<"Computation time search zones: "<<c_time<<" s"<<std::endl;
-
-
-  //Create and plot the Independent Contact Regions
   IndependentContactRegions icr(search_zones,prototype_grasp);
-
-  gettimeofday(&start,0);
   icr.computeICR(BFS); //explore points for inclusion via a Breadth-First Search with the prototype grasp's centerpoints as root nodes
-  gettimeofday(&end,0);
-  c_time = end.tv_sec - start.tv_sec + 0.000001 * (end.tv_usec - start.tv_usec);
-  std::cout<<"Computation time icr: "<<c_time<<" s"<<std::endl;
-  std::cout<<"icr: "<<icr<<std::endl;
-  std::cout<<"Num icr: "<<icr.getNumICRPoints()<<std::endl;
- 
- 
+  std::cout<<"icr before transform: "<<icr<<std::endl;
+  std::cout<<"Num icr before transform: "<<icr.getNumICRPoints()<<std::endl;
+
+
+  Eigen::Matrix3d rot;
+  rot = Eigen::AngleAxisd(0.35*M_PI, Eigen::Vector3d::UnitX())
+      * Eigen::AngleAxisd(0.11*M_PI, Eigen::Vector3d::UnitY())
+      * Eigen::AngleAxisd(0.52*M_PI, Eigen::Vector3d::UnitZ());
+  Eigen::Vector3d trans; trans(0)=0; trans(1)=0; trans(2)=0; 
+  Eigen::Affine3d T;T.setIdentity(); T.translate(trans); T.rotate(rot); //T.translate(trans);//T.rotation()=rot; T.translation()=trans;
+
+  obj->transform(T);
+
+ prototype_grasp.reset(new Grasp());
+  prototype_grasp->init(f_parameters,obj,centerpoint_ids);
+search_zones.reset(new SearchZones(prototype_grasp));
+   search_zones->setTaskWrenchSpace(tws);
+  search_zones->computeShiftedSearchZones();
+  IndependentContactRegions icr_t(search_zones,prototype_grasp);
+  icr_t.computeICR(BFS); //explore points for inclusion via a Breadth-First Search with the prototype grasp's centerpoints as root nodes
+  std::cout<<"icr after transform: "<<icr_t<<std::endl;
+  std::cout<<"Num icr after transform: "<<icr_t.getNumICRPoints()<<std::endl;
+
   return 0;
 }
 
@@ -96,4 +89,3 @@ int main()
 // Centerpoint id's region 1: 910 887 888 929 938 939 869 876 960 990 1013 1030 875 894 905 972 989 1001 1073 1074 1040 1089 1118 950 957 1027 1047 1048 1134 1050 1152 1198 949 987 1046 1115 1070 1102 1168 1004 1281 1222 1130 1132 1151 1197 1247 1310 1150 1263 1297 1279 1321 1333 
 // Centerpoint id's region 2: 642 633 679 696 
 // Centerpoint id's region 3: 1554 1630 2496 2500 2498 2501 2493 1295 1334 2494 1294 1296 1332 1234 1273 1167 1260 
-

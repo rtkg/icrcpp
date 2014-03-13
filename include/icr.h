@@ -105,6 +105,8 @@
  *
  *- Add a flipNormals() method to the ICR::TargetObject class to invert vertex normal directions
  *
+ *- Remove debug flags for writing properties to hardcoded files and implement methods taking a path instead
+ *
  */
 
 #include "utilities.h"

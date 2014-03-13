@@ -14,7 +14,7 @@ LIBS += -Wl,-rpath,/home/rkg/Data/Programs/gurobi562/linux64/lib -L/home/rkg/Dat
 
 #FN=experiments_ICR_tilt
 #FN=experiments_ICR_shift
-FN=example
+FN=example_transform
 #FN=dummy
 
 IDIR += -I ../tools/eigen-eigen-3.0.2            #include eigen headers
