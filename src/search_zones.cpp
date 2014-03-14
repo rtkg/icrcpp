@@ -511,5 +511,36 @@ search_zones_computed_(false)
       resetPrimitiveSearchZones(sz_id);
   }
   //--------------------------------------------------------------------
+  bool SearchZones::writeToFile(const std::string& path)const
+   {
+    if (!search_zones_computed_)
+      {
+	std::cout<<"Warning in SearchZones::writeToFile(const std::string& path)const - Search zones not computed, cannot write to file"<<std::endl;
+	return false;
+      }
+
+    remove(path.c_str());
+    FILE* hp=fopen (path.c_str(),"a");
+    if(!hp)
+      {
+	std::cout<<"Warning in SearchZones::writeToFile(const std::string& path)const - Couldn't write to file"<<std::endl;
+	return false;
+      }
+
+    for(uint i=0;i<hyperplane_offsets_.size();i++)
+      {
+	if (hyperplane_normals_.cols()==3)
+	  fprintf(hp, "% f % f % f % f  \n",hyperplane_normals_.row(i)(0),hyperplane_normals_.row(i)(1),hyperplane_normals_.row(i)(2),hyperplane_offsets_(i));
+	else if (hyperplane_offsets_.cols()==6)
+	  fprintf(hp, "% f % f % f % f % f % f %f \n", hyperplane_normals_.row(i)(0),hyperplane_normals_.row(i)(1),hyperplane_normals_.row(i)(2),hyperplane_normals_.row(i)(3),hyperplane_normals_.row(i)(4),hyperplane_normals_.row(i)(5),hyperplane_offsets_(i));
+	else
+	  {
+	    std::cout<<"Warning in SearchZones::writeToFile(const std::string& path)const - cann only write 3- or 6D hyperplanes to file!"<<std::endl;
+	    return false;
+	  }
+      }
+    fclose (hp);
+    return true;
+}
   //--------------------------------------------------------------------
 }//namespace ICR
