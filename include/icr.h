@@ -107,6 +107,7 @@
  *
  *- Assertion (angle==angle) in  OWS::addWrenchCone(uint id,Eigen::Vector3d const* const cp_vtx, Eigen::Vector3d const* const cp_vtx_normal) has happend to fail -> FIXME!
  *
+ *- the members of the IndependentContactRegions class which are accessed during the inclusion tests should be mutex-protected
  */
 
 #include "utilities.h"

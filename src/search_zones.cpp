@@ -531,7 +531,7 @@ search_zones_computed_(false)
       {
 	if (hyperplane_normals_.cols()==3)
 	  fprintf(hp, "% f % f % f % f  \n",hyperplane_normals_.row(i)(0),hyperplane_normals_.row(i)(1),hyperplane_normals_.row(i)(2),hyperplane_offsets_(i));
-	else if (hyperplane_offsets_.cols()==6)
+	else if (hyperplane_normals_.cols()==6)
 	  fprintf(hp, "% f % f % f % f % f % f %f \n", hyperplane_normals_.row(i)(0),hyperplane_normals_.row(i)(1),hyperplane_normals_.row(i)(2),hyperplane_normals_.row(i)(3),hyperplane_normals_.row(i)(4),hyperplane_normals_.row(i)(5),hyperplane_offsets_(i));
 	else
 	  {
