@@ -107,6 +107,7 @@
  *
  *- ICR::IndependentContactRegions and ICR::SearchZones shouldn't have a GraspPtr member...
  *
+ *- the members of the IndependentContactRegions class which are accessed during the inclusion tests should be mutex-protected
  */
 
 #include "utilities.h"

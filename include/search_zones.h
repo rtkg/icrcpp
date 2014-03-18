@@ -101,7 +101,7 @@ namespace ICR
     Eigen::Matrix<double,Eigen::Dynamic,6> const* getHyperplaneNormals()const;
     Eigen::VectorXd const*getHyperplaneOffsets()const;
     WrenchSpacePtr getTaskWrenchSpace()const;
-
+    bool writeToFile(const std::string& path)const;
 #ifdef WITH_GUROBI
     void computePrioritizedSearchZones(uint finger_id);
 #endif
