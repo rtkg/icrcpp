@@ -9,27 +9,26 @@ int main()
 { 
   //Load a new target object 
   ObjectLoader obj_loader;
-  obj_loader.loadObject("../models/Sprayflask_5k.obj","Sprayflask_5k");
+  obj_loader.loadObject("../models/Fish_5k.obj","Fish_5k");
  
   //Create a list of default finger parameters (default parameters defined in config.h) and a 
   //vector of centerpoint contact id's for the 
   FParamList f_parameters;
   FingerParameters parameters;
-  parameters.setFrictionalContact (1, 8, 0.8);
-  parameters.setWrenchIncusionTestType(Primitive);
+  parameters.setFrictionalContact (1, 6, 0.8);
+  parameters.setWrenchIncusionTestType(Convex_Combination);
   parameters.setContactModelType(Single_Point); 
   parameters.setInclusionRuleType(Sphere);
   parameters.setInclusionRuleParameter(10);
   //parameters.setSoftFingerContact(1, 8, 0.8, 0.8);
-  uint n_fingers=5; //number of fingers in the prototype grasp
+  uint n_fingers=4; //number of fingers in the prototype grasp
   for (int i=0;i<n_fingers;i++)
     f_parameters.push_back(parameters);
   
   VectorXui centerpoint_ids(n_fingers);
+ centerpoint_ids<<1929,910, 642,1554;
 
-    WrenchSpacePtr tws(new SphericalWrenchSpace(6,0.000501277));
-    //   centerpoint_ids=generateRandomGrasp(obj_loader.getObject(),f_parameters,tws);
-    centerpoint_ids<<447,1159,1139,1274,1272;
+WrenchSpacePtr tws(new SphericalWrenchSpace(6,1e-3));
 
   //Create a prototype grasp and search zones, the parameter alpha is the scale of the largest
   //origin-centered ball contained by the Grasp wrench space of the prototype grasp
