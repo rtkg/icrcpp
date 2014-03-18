@@ -261,6 +261,9 @@ search_zones_computed_(false)
     //Make sure the grasp is valid
     assert(grasp_->getGWS()->containsOrigin());
 
+    //Make sure the given finger_id is valid
+    assert(finger_id <num_search_zones_);
+
     initializeSearchZones();
     computePrioritizedHyperplanes(finger_id);
     computePrimitiveSearchZones();
