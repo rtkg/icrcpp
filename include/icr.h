@@ -108,6 +108,8 @@
  *- ICR::IndependentContactRegions and ICR::SearchZones shouldn't have a GraspPtr member...
  *
  *- the members of the IndependentContactRegions class which are accessed during the inclusion tests should be mutex-protected
+ *
+ *- switch to Qhull 2012 - should get rid of some segfaults ...
  */
 
 #include "utilities.h"
